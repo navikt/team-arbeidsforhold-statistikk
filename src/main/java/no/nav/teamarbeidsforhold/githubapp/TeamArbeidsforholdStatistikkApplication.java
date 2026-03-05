@@ -5,9 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class TeamArbeidsforholdStatistikkApplication {
-
 	static void main(String[] args) {
 		SpringApplication.run(TeamArbeidsforholdStatistikkApplication.class, args);
 	}
-
 }
