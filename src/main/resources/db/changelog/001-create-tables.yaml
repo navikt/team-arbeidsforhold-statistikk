@@ -1,0 +1,91 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001
+      author: W175869
+      changes:
+        - createTable:
+            tableName: repo
+            columns:
+              - column:
+                  name: full_name
+                  type: VARCHAR(250)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: clone_url
+                  type: VARCHAR(250)
+              - column:
+                  name: last_seen
+                  type: DATETIME
+
+        - createTable:
+            tableName: workload
+            columns:
+              - column:
+                  name: name
+                  type: VARCHAR(250)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: workload_type
+                  type: VARCHAR(20)
+
+        - createTable:
+            tableName: deployment
+            columns:
+              - column:
+                  name: workload_name
+                  type: VARCHAR(250)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: workload_type
+                  type: VARCHAR(20)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: environment
+                  type: VARCHAR(20)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: last_seen
+                  type: DATETIME
+
+        - createTable:
+            tableName: workload_repo
+            columns:
+              - column:
+                  name: workload_name
+                  type: VARCHAR(250)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: repo_full_name
+                  type: VARCHAR(250)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: last_seen
+                  type: DATETIME
+
+        - addForeignKeyConstraint:
+            baseTableName: deployment
+            baseColumnNames: workload_name
+            referencedTableName: workload
+            referencedColumnNames: name
+            constraintName: fk_deployment_workload
+
+        - addForeignKeyConstraint:
+            baseTableName: workload_repo
+            baseColumnNames: workload_name
+            referencedTableName: workload
+            referencedColumnNames: name
+            constraintName: fk_workload_repo_workload
+
+        - addForeignKeyConstraint:
+            baseTableName: workload_repo
+            baseColumnNames: repo_full_name
+            referencedTableName: repo
+            referencedColumnNames: full_name
+            constraintName: fk_workload_repo_repo
