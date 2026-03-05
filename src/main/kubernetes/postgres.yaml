@@ -1,0 +1,19 @@
+apiVersion: data.nais.io/v1
+kind: Postgres
+metadata:
+  name: team-arbeidsforhold-github-app
+spec:
+  cluster:
+    majorVersion: "17"
+    resources:
+      cpu: 100m
+      diskSize: 2Gi
+      memory: 2G
+    allowDeletion: false
+    audit: false
+    highAvailability: false
+  database:
+    collation: nb_NO
+  maintenanceWindow:
+    day: 7
+    hour: 0
