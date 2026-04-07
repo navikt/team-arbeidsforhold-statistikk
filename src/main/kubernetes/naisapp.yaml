@@ -26,4 +26,4 @@ spec:
       valueFrom:
         secretKeyRef:
           name: github-app
-          key: client-id
+          key: client-secret
