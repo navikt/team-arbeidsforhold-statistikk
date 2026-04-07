@@ -14,3 +14,4 @@ spring:
 app:
   client:
     id: local-test-client
+  private-key: "Ikke brukt i test, vi mocker denne i TestKeysConfig"
