@@ -40,5 +40,5 @@ jobs:
         uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
-          RESOURCE: src/main/kubernetes/naisapp.yaml
+          RESOURCE: src/main/kubernetes/postgres.yaml,src/main/kubernetes/naisapp.yaml
           WORKLOAD_IMAGE: ${{ steps.docker-build-push.outputs.image }}
