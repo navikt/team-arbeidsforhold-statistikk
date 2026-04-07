@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: team-arbeidsforhold-statistikk
   namespace: arbeidsforhold
+  labels:
+    team: arbeidsforhold
 spec:
   ingresses:
     - https://team-arbeidsforhold-statistikk.dev.nav.cloud.nais.io
