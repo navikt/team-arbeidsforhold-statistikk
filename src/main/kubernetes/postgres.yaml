@@ -11,7 +11,8 @@ spec:
       diskSize: 2Gi
       memory: 2G
     allowDeletion: false
-    audit: false
+    audit:
+      enabled: false
     highAvailability: false
   database:
     collation: nb_NO
