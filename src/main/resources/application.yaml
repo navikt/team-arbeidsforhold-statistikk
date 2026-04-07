@@ -2,8 +2,7 @@ spring:
   application:
     name: team-arbeidsforhold-statistikk
   datasource:
-    hikari:
-      jdbc-url: ${PGJDBCURL}
+    url: ${PGJDBCURL}
   jpa:
     hibernate:
       ddl-auto: none

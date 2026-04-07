@@ -2,8 +2,7 @@ spring:
   application:
     name: team-arbeidsforhold-statistikk
   datasource:
-    hikari:
-      jdbc-url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:testdb
   jpa:
     hibernate:
       ddl-auto: none
