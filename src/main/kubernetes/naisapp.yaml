@@ -28,4 +28,4 @@ spec:
       valueFrom:
         secretKeyRef:
           name: github-app
-          key: client-secret
+          key: client-id
