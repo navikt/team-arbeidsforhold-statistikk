@@ -14,3 +14,6 @@ app:
   client:
     id: ${CLIENT_ID:local-test-client}
   private-key: ${PRIVATE_KEY}
+logging:
+  level:
+    org.springframework.core.env: TRACE
