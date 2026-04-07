@@ -20,3 +20,13 @@ spec:
     clusterName: arbeidsforhold-github-app
   envFrom:
     - secret: github-app
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: false
+      claims:
+        groups:
+          - id: "0000-GA-Team-Arbeidsforhold"
+    sidecar:
+      enabled: true
+      autoLogin: true
