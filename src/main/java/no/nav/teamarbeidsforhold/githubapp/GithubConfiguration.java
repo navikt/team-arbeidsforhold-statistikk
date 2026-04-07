@@ -37,7 +37,7 @@ public class GithubConfiguration {
 
             final String råNøkkel = formatertNøkkel
                     .replace("-----BEGIN PRIVATE KEY-----", "")
-                    .replace("-----END PRIVATE KEY-----s", "")
+                    .replace("-----END PRIVATE KEY-----", "")
                     .replaceAll("\\s+", "");
             try {
                 return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(råNøkkel)));
