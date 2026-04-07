@@ -18,14 +18,5 @@ spec:
       memory: 32Mi
   postgres:
     clusterName: arbeidsforhold-github-app
-  env:
-    - name: PRIVATE_KEY
-      valueFrom:
-        secretKeyRef:
-          name: github-app
-          key: private-key
-    - name: CLIENT_ID
-      valueFrom:
-        secretKeyRef:
-          name: github-app
-          key: client-id
+  envFrom:
+    - secret: github-app
