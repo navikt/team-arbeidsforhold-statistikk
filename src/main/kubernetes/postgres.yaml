@@ -1,7 +1,7 @@
 apiVersion: data.nais.io/v1
 kind: Postgres
 metadata:
-  name: team-arbeidsforhold-github-app
+  name: arbeidsforhold-github-app
 spec:
   cluster:
     majorVersion: "17"
