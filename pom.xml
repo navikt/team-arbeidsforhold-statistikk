@@ -66,6 +66,12 @@
             <version>1.83</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
+            <version>1.83</version>
+            <scope>runtime</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.postgresql</groupId>
