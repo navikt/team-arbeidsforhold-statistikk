@@ -35,6 +35,7 @@ jobs:
         id: docker-build-push
         with:
           team: arbeidsforhold
+          dockerfile: src/main/docker/Dockerfile
       - name: Deploy to Nais
         uses: nais/deploy/actions/deploy@v2
         env:
