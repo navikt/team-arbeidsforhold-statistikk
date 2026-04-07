@@ -4,6 +4,7 @@ metadata:
   name: arbeidsforhold-github-app
 spec:
   cluster:
+    name: arbeidsforhold-github-app
     majorVersion: "17"
     resources:
       cpu: 100m
