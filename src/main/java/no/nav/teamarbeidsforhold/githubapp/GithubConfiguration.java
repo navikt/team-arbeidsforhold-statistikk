@@ -1,5 +1,7 @@
 package no.nav.teamarbeidsforhold.githubapp;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.jwk.JWK;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.authorization.AppInstallationAuthorizationProvider;
@@ -34,14 +36,9 @@ public class GithubConfiguration {
     @Bean
     public Supplier<PrivateKey> nøkkel(@Value("${app.private-key}") String formatertNøkkel) throws NoSuchAlgorithmException, InvalidKeySpecException {
         return () -> {
-
-            final String råNøkkel = formatertNøkkel
-                    .replace("-----BEGIN PRIVATE KEY-----", "")
-                    .replace("-----END PRIVATE KEY-----", "")
-                    .replaceAll("\\s+", "");
             try {
-                return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(råNøkkel)));
-            } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+                return JWK.parseFromPEMEncodedObjects(formatertNøkkel).toRSAKey().toPrivateKey();
+            } catch (JOSEException e) {
                 throw new RuntimeException("Feil i konfigurert nøkkel", e);
             }
         };
