@@ -60,6 +60,12 @@
             <artifactId>nimbus-jose-jwt</artifactId>
             <version>9.37.4</version>
         </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.83</version>
+            <scope>runtime</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.postgresql</groupId>
