@@ -3,7 +3,7 @@ spring:
     name: team-arbeidsforhold-statistikk
   datasource:
     hikari:
-      jdbc-url: ${PGJDBCURL}
+      jdbc-url: jdbc:h2:mem:testdb
   jpa:
     hibernate:
       ddl-auto: none
@@ -13,5 +13,4 @@ spring:
     change-log: classpath:db/changelog-master.yaml
 app:
   client:
-    id: ${CLIENT_ID:local-test-client}
-  private-key: ${PRIVATE_KEY}
+    id: local-test-client

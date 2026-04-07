@@ -15,6 +15,7 @@ import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
+import java.util.function.Supplier;
 
 @Configuration
 public class GithubConfiguration {
@@ -26,16 +27,23 @@ public class GithubConfiguration {
     }
 
     @Bean
-    public AppInstallationAuthorizationProvider autentiserer(@Value("${client-id}") String clientId, final PrivateKey nøkkel) {
-        return new AppInstallationAuthorizationProvider(x -> x.getInstallationByOrganization(ORG_NAVN), new JWTTokenProvider(clientId, nøkkel));
+    public AppInstallationAuthorizationProvider autentiserer(@Value("${app.client.id}") String clientId, final Supplier<PrivateKey> nøkkel) {
+        return new AppInstallationAuthorizationProvider(x -> x.getInstallationByOrganization(ORG_NAVN), new JWTTokenProvider(clientId, nøkkel.get()));
     }
 
     @Bean
-    public PrivateKey nøkkel(@Value("${private-key}") String formatertNøkkel) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        final String råNøkkel = formatertNøkkel
-                .replace("-----BEGIN PRIVATE KEY-----", "")
-                .replace("-----END PRIVATE KEY-----s", "")
-                .replaceAll("\\s+", "");
-        return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(råNøkkel)));
+    public Supplier<PrivateKey> nøkkel(@Value("${app.private-key}") String formatertNøkkel) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        return () -> {
+
+            final String råNøkkel = formatertNøkkel
+                    .replace("-----BEGIN PRIVATE KEY-----", "")
+                    .replace("-----END PRIVATE KEY-----s", "")
+                    .replaceAll("\\s+", "");
+            try {
+                return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(råNøkkel)));
+            } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+                throw new RuntimeException("Feil i konfigurert nøkkel", e);
+            }
+        };
     }
 }
