@@ -1,22 +1,17 @@
 package no.nav.teamarbeidsforhold.githubapp;
 
-import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
+import org.springframework.boot.EnvironmentPostProcessor;
+import org.springframework.boot.SpringApplication;
+import org.springframework.core.env.ConfigurableEnvironment;
 
-@Configuration
-@RequiredArgsConstructor
-public class EnvCheck {
-    private final Environment env;
-
-    @PostConstruct
-    public void sjekkUrl() {
-        final String url = env.getProperty("spring.datasource.url");
+public class EnvCheck implements EnvironmentPostProcessor {
+    @Override
+    public void postProcessEnvironment(final ConfigurableEnvironment environment, final SpringApplication application) {
+        final String url = environment.getProperty("spring.datasource.url");
 
         if (url == null || url.isBlank()) {
-            final String systemurl = env.getProperty("PGJDBCURL");
-            final String host = env.getProperty("PGHOST");
+            final String systemurl = environment.getProperty("PGJDBCURL");
+            final String host = environment.getProperty("PGHOST");
             final StringBuilder melding = new StringBuilder();
             if (systemurl == null || systemurl.isBlank()) {
                 melding.append("ingen pgjdbcurl");
@@ -31,5 +26,6 @@ public class EnvCheck {
             throw new IllegalStateException(
                     "Url er feil. Starter med:" + url.substring(0, 4));
         }
+
     }
 }
