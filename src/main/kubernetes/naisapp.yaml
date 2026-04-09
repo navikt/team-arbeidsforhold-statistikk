@@ -26,8 +26,8 @@ spec:
       allowAllUsers: false
       claims:
         groups:
-          - id: "0000-GA-Team-Arbeidsforhold"
-          - id: "0000-GA-JIRA-LG-IT_Team_Registre_Arbeid"
+          - id: "08d977f5-0fba-4079-991f-e392f6e63013"
+          - id: "928636f4-fd0d-4149-978e-a6fb68bb19de"
     sidecar:
       enabled: true
       autoLogin: true
