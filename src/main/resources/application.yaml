@@ -10,6 +10,12 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:db/changelog-master.yaml
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${AZURE_OPENID_CONFIG_ISSUER}
+          audiences: ${AZURE_APP_CLIENT_ID}
 app:
   client:
     id: ${CLIENT_ID:local-test-client}
