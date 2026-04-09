@@ -32,3 +32,8 @@ spec:
     sidecar:
       enabled: true
       autoLogin: true
+  accessPolicy:
+    inbound:
+      rules:
+        - application: azure-token-generator
+          namespace: nais
