@@ -11,9 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.spec.InvalidKeySpecException;
 import java.util.function.Supplier;
 
 @Configuration
@@ -26,12 +24,12 @@ public class GithubConfiguration {
     }
 
     @Bean
-    public AppInstallationAuthorizationProvider autentiserer(@Value("${app.client.id}") String clientId, final Supplier<PrivateKey> nøkkel) {
-        return new AppInstallationAuthorizationProvider(x -> x.getInstallationByOrganization(ORG_NAVN), new JWTTokenProvider(clientId, nøkkel.get()));
+    public AppInstallationAuthorizationProvider autentiserer(@Value("${app.githubapp.id}") long appId, final Supplier<PrivateKey> nøkkel) {
+        return new AppInstallationAuthorizationProvider(x -> x.getInstallationByOrganization(ORG_NAVN), new JWTTokenProvider(String.valueOf(appId), nøkkel.get()));
     }
 
     @Bean
-    public Supplier<PrivateKey> nøkkel(@Value("${app.private-key}") String formatertNøkkel) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public Supplier<PrivateKey> nøkkel(@Value("${app.private-key}") String formatertNøkkel) {
         return () -> {
             try {
                 return JWK.parseFromPEMEncodedObjects(formatertNøkkel).toRSAKey().toPrivateKey();

@@ -20,3 +20,5 @@ app:
   client:
     id: ${CLIENT_ID:local-test-client}
   private-key: ${PRIVATE_KEY}
+  githubapp:
+    id: 2368111
