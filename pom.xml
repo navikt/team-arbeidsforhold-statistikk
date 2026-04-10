@@ -53,6 +53,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.3.0</version>
         </dependency>
 
         <dependency>
@@ -228,7 +229,58 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>7.21.0</version>
+                <executions>
+                    <execution>
+                        <id>generate-react-api</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generatorName>typescript-axios</generatorName>
+                            <inputSpec>${basedir}/src/main/resources/openapi/openapi.json</inputSpec>
+                            <output>${project.build.directory}/generated-api</output>
+
+                            <additionalProperties>
+                                <useSingleRequestParameter>true</useSingleRequestParameter>
+                                <withSeparateModelsAndApi>true</withSeparateModelsAndApi>
+                                <supportsES6>true</supportsES6>
+                            </additionalProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-spring-skeleton</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generatorName>spring</generatorName>
+                            <inputSpec>${basedir}/src/main/resources/openapi/openapi.json</inputSpec>
+                            <output>${project.build.directory}/generated-sources/openapi</output>
+                            <generateApis>true</generateApis>
+                            <generateModels>true</generateModels>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <modelPackage>no.nav.teamarbeidsforhold.githubapp.generert.modell</modelPackage>
+                            <apiPackage>no.nav.teamarbeidsforhold.githubapp.generert.api</apiPackage>
+                            <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <openApiNullable>false</openApiNullable>
+                            </configOptions>
+                            <additionalProperties>
+                                <hideGenerationTimestamp>true</hideGenerationTimestamp>
+                                <requestMappingMode>api_interface</requestMappingMode>
+                                <useSpringBoot4>true</useSpringBoot4>
+                            </additionalProperties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-
 </project>

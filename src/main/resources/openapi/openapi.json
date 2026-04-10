@@ -1,0 +1,52 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Team arbeidsforhold statistikk api",
+    "description": "Team arbeidsforhold statistikk api",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/repos": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Repo"
+                  }
+                }
+              }
+            },
+            "description": "Liste over teamet's repoer"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Repo": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "errorcount": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "url",
+          "errorcount"
+        ]
+      }
+    }
+  }
+}
