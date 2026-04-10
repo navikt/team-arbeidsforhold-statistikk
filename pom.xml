@@ -211,6 +211,16 @@
                             <pnpmVersion>10.33.0</pnpmVersion>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>pnpm-install</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>pnpm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>install --frozen-lockfile</arguments>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
