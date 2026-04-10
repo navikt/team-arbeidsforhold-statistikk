@@ -180,7 +180,10 @@
                             <target>
                                 <mkdir dir="${basedir}/target/aksel-frontend"/>
                                 <copy todir="${basedir}/target/aksel-frontend">
-                                    <fileset dir="${basedir}/src/main/aksel-frontend" includes="**/*"/>
+                                    <fileset dir="${basedir}/src/main/aksel-frontend">
+                                        <exclude name="node_modules"/>
+                                        <exclude name="**/node_modules/"/>
+                                    </fileset>
                                 </copy>
                             </target>
                         </configuration>
