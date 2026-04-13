@@ -77,7 +77,10 @@
           "debug": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "name"
+        ]
       }
     }
   }

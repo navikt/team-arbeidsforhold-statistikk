@@ -1,13 +1,17 @@
 package no.nav.teamarbeidsforhold.githubapp.controller;
 
+import no.nav.teamarbeidsforhold.githubapp.generert.api.MeApi;
 import no.nav.teamarbeidsforhold.githubapp.generert.api.ReposApi;
 import no.nav.teamarbeidsforhold.githubapp.generert.modell.Repo;
+import no.nav.teamarbeidsforhold.githubapp.generert.modell.User;
 import no.nav.teamarbeidsforhold.githubapp.service.DatabaseService;
 import no.nav.teamarbeidsforhold.githubapp.service.GithubService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+
+import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
 public class Api implements ReposApi {
@@ -21,6 +25,6 @@ public class Api implements ReposApi {
 
     public ResponseEntity<List<Repo>> reposGet() {
         githubService.prøvOppdater();
-        return ResponseEntity.ok(databaseService.alleRepoer());
+        return ok(databaseService.alleRepoer());
     }
 }
