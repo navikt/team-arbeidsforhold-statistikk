@@ -1,10 +1,10 @@
 package no.nav.teamarbeidsforhold.githubapp.controller;
 
+import jakarta.persistence.EntityManager;
 import no.nav.teamarbeidsforhold.githubapp.generert.api.ReposApi;
 import no.nav.teamarbeidsforhold.githubapp.generert.modell.Repo;
 import no.nav.teamarbeidsforhold.githubapp.service.GithubService;
 import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GitHub;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,9 +14,11 @@ import java.util.List;
 @RestController
 public class Api implements ReposApi {
     private final GithubService githubService;
+    private final EntityManager entityManager;
 
-    Api(final GitHub github, final GithubService githubService) {
+    Api(final GithubService githubService, final EntityManager entityManager) {
         this.githubService = githubService;
+        this.entityManager = entityManager;
     }
 
     public ResponseEntity<List<Repo>> reposGet() {
