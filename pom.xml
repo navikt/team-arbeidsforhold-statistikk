@@ -199,6 +199,8 @@
                                 <enumNameSuffix/>
                                 <modelPropertyNaming>original</modelPropertyNaming>
                                 <supportsES6>true</supportsES6>
+                                <noRuntimeChecks>true</noRuntimeChecks>
+                                <noBasePath>true</noBasePath>
                             </additionalProperties>
                         </configuration>
                     </execution>

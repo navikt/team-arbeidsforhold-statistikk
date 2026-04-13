@@ -5,6 +5,11 @@
     "description": "Team arbeidsforhold statistikk api",
     "version": "1.0.0"
   },
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ],
   "paths": {
     "/repos": {
       "get": {
@@ -21,6 +26,22 @@
               }
             },
             "description": "Liste over teamet's repoer"
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "Den innloggede brukeren"
           }
         }
       }
@@ -46,6 +67,17 @@
           "url",
           "errorcount"
         ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "debug": {
+            "type": "string"
+          }
+        }
       }
     }
   }

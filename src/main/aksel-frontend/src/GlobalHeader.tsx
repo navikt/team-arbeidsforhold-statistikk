@@ -1,4 +1,5 @@
 import {Spacer, InternalHeader} from "@navikt/ds-react";
+import {Me} from "./components/Me.tsx"
 
 export function GlobalHeader() {
     return (
@@ -6,7 +7,7 @@ export function GlobalHeader() {
             <InternalHeader>
                 <InternalHeader.Title as="h1">Team Arbeidsforhold's repoer</InternalHeader.Title>
                 <Spacer/>
-                <InternalHeader.User name="Ola Normann"/>
+                <Me/>
             </InternalHeader>
         </header>
     );
