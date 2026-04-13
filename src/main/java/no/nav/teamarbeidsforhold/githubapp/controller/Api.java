@@ -1,16 +1,15 @@
 package no.nav.teamarbeidsforhold.githubapp.controller;
 
+import no.nav.teamarbeidsforhold.githubapp.generert.api.ReposApi;
+import no.nav.teamarbeidsforhold.githubapp.generert.modell.Repo;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHTeam;
 import org.kohsuke.github.GitHub;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import no.nav.teamarbeidsforhold.githubapp.generert.api.ReposApi;
-import no.nav.teamarbeidsforhold.githubapp.generert.modell.Repo;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 public class Api implements ReposApi {
