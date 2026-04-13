@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/")
 public class Hovedsite {
 
-    @GetMapping("/{path:^(?!api).*$}")
+    @GetMapping({"/{ignored:[^.]*}", "/**/{ignored:[^.]*}"})
     public String forward() {
         return "forward:/index.html";
     }
