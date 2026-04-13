@@ -29,6 +29,9 @@ databaseChangeLog:
               - column:
                   name: workload_type
                   type: VARCHAR(20)
+              - column:
+                  name: image
+                  type: VARCHAR(250)
 
         - createTable:
             tableName: deployment
@@ -68,6 +71,17 @@ databaseChangeLog:
               - column:
                   name: last_seen
                   type: DATETIME
+        - createTable:
+            tableName: action_deployment_run
+            columns:
+              - column:
+                  name: repo_full_name
+                  type: VARCHAR(250)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: image
+                  type: VARCHAR(250)
 
         - addForeignKeyConstraint:
             baseTableName: deployment
@@ -89,3 +103,9 @@ databaseChangeLog:
             referencedTableName: repo
             referencedColumnNames: full_name
             constraintName: fk_workload_repo_repo
+        - addForeignKeyConstraint:
+            baseTableName: action_deployment_run
+            baseColumnNames: repo_full_name
+            referencedTableName: repo
+            referencedColumnNames: full_name
+            constraintName: fk_action_deployment_run_repo
