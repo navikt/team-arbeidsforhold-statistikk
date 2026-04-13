@@ -176,59 +176,6 @@
             </plugin>
             <!-- Frontend ting -->
             <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>3.2.0</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <target>
-                                <mkdir dir="${basedir}/target/aksel-frontend"/>
-                                <copy todir="${basedir}/target/aksel-frontend">
-                                    <fileset dir="${basedir}/src/main/aksel-frontend">
-                                        <exclude name="node_modules"/>
-                                        <exclude name="**/node_modules/"/>
-                                    </fileset>
-                                </copy>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.github.eirslett</groupId>
-                <artifactId>frontend-maven-plugin</artifactId>
-                <version>1.15.0</version>
-                <configuration>
-                    <workingDirectory>target/aksel-frontend</workingDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>install-node</id>
-                        <goals>
-                            <goal>install-node-and-pnpm</goal>
-                        </goals>
-                        <configuration>
-                            <nodeVersion>v25.6.1</nodeVersion>
-                            <pnpmVersion>10.33.0</pnpmVersion>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>pnpm-install</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>pnpm</goal>
-                        </goals>
-                        <configuration>
-                            <arguments>install --frozen-lockfile</arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
                 <version>7.21.0</version>
@@ -276,6 +223,94 @@
                                 <requestMappingMode>api_interface</requestMappingMode>
                                 <useSpringBoot4>true</useSpringBoot4>
                             </additionalProperties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <target>
+                                <mkdir dir="${basedir}/target/aksel-frontend"/>
+                                <copy todir="${basedir}/target/aksel-frontend">
+                                    <fileset dir="${basedir}/src/main/aksel-frontend">
+                                        <exclude name="node_modules"/>
+                                        <exclude name="**/node_modules/"/>
+                                    </fileset>
+                                </copy>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>1.15.0</version>
+                <configuration>
+                    <workingDirectory>target/aksel-frontend</workingDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>install-node</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>install-node-and-pnpm</goal>
+                        </goals>
+                        <configuration>
+                            <nodeVersion>v25.6.1</nodeVersion>
+                            <pnpmVersion>10.33.0</pnpmVersion>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>pnpm-install</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>pnpm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>install --frozen-lockfile</arguments>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>pnpm-build</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>pnpm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>run build</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-frontend</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>
+                                ${project.build.outputDirectory}/static
+                            </outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>target/aksel-frontend/dist</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
                         </configuration>
                     </execution>
                 </executions>
