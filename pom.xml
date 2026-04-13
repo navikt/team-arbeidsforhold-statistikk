@@ -297,7 +297,7 @@
                 <executions>
                     <execution>
                         <id>copy-frontend</id>
-                        <phase>process-resources</phase>
+                        <phase>process-classes</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
