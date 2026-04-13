@@ -189,11 +189,15 @@
                         <configuration>
                             <generatorName>typescript-axios</generatorName>
                             <inputSpec>${basedir}/src/main/resources/openapi/openapi.json</inputSpec>
-                            <output>${project.build.directory}/generated-api</output>
+                            <output>${project.build.directory}/aksel-frontend/src</output>
 
                             <additionalProperties>
                                 <useSingleRequestParameter>true</useSingleRequestParameter>
                                 <withSeparateModelsAndApi>true</withSeparateModelsAndApi>
+                                <withoutRuntimeChecks>true</withoutRuntimeChecks>
+                                <stringEnums>true</stringEnums>
+                                <enumNameSuffix/>
+                                <modelPropertyNaming>original</modelPropertyNaming>
                                 <supportsES6>true</supportsES6>
                             </additionalProperties>
                         </configuration>
