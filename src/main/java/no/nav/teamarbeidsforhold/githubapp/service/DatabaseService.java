@@ -17,7 +17,7 @@ public class DatabaseService {
         this.repoRepository = repoRepository;
     }
 
-    public List<Repo> findAll() {
+    public List<Repo> alleRepoer() {
         final String repoer = """
                 navikt/aareg
                 navikt/aareg-ajourholdsfiler
