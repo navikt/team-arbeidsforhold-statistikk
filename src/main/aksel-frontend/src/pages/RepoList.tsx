@@ -13,7 +13,7 @@ export default function RepoList() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        api.reposGet({})
+        api.repoGet({})
             .then((response: AxiosResponse<Repo[]>) => {
                 setRepos(response.data);
             })
