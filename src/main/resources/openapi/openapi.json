@@ -11,7 +11,7 @@
     }
   ],
   "paths": {
-    "/repos": {
+    "/repo": {
       "get": {
         "responses": {
           "200": {
@@ -26,6 +26,33 @@
               }
             },
             "description": "Liste over teamet's repoer"
+          }
+        }
+      }
+    },
+    "/repo/{repoName}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "repoName",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Navnet på repoet, slik som det er i url'er, dvs neste path-element etter /navikt/ på github"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                    "$ref": "#/components/schemas/RepoDetails"
+                }
+              }
+            },
+            "description": "Detaljer for ett repo"
           }
         }
       }
@@ -58,14 +85,58 @@
           "url": {
             "type": "string"
           },
-          "errorcount": {
+          "errorCount": {
+            "type": "integer"
+          },
+          "criticalCount": {
             "type": "integer"
           }
         },
         "required": [
           "name",
           "url",
-          "errorcount"
+          "errorcount",
+          "criticalCount"
+        ]
+      },
+      "RepoDetails": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "deploymentNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "environments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "deploymentConsistent": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "url",
+          "errors",
+          "deploymentNames",
+          "environments",
+          "deploymentConsistent"
         ]
       },
       "User": {
