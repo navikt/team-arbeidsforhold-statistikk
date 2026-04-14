@@ -8,6 +8,7 @@ import no.nav.teamarbeidsforhold.githubapp.repository.RepoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -76,7 +77,7 @@ public class DatabaseService {
                 team-arbeidsforhold-utvikling
                 vault-iac
                 """;
-        return Arrays.stream(repoer.split("\\s+")).map(navn -> new Repo(navn, "https://github.com/" + navn, 0)).toList();
+        return Arrays.stream(repoer.split("\\s+")).map(navn -> new Repo(navn, URI.create("https://github.com/" + navn), 0, 0)).toList();
         //return repoRepository.listAll().stream().map(repoEntitet -> new Repo(repoEntitet.getFullName(), repoEntitet.getCloneUrl(), 0)).toList();
     }
 
@@ -197,6 +198,7 @@ public class DatabaseService {
     }
 
     public RepoDetails repoMedNavn(final String repoName) {
-        return new RepoDetails(repoName, "https://github.com/" + repoName);
+        final List<Deployment> mineDeployments = alleDeployments().stream().filter(d -> d.getId().getWorkloadName().startsWith(repoName) && d.getId().getWorkloadName().substring(repoName.length()).matches("-\\w\\d")).toList();
+        return new RepoDetails(repoName, URI.create("https://github.com/" + repoName), 0, Math.min(mineDeployments.size() - 2, 0), mineDeployments.stream().map(Deployment::getId).map(DeploymentId::getWorkloadName).distinct().toList(), mineDeployments.stream().map(Deployment::getId).map(DeploymentId::getEnvironment).distinct().toList(), true);
     }
 }

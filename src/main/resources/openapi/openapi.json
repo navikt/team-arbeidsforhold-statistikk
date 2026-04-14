@@ -48,7 +48,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                    "$ref": "#/components/schemas/RepoDetails"
+                  "$ref": "#/components/schemas/RepoDetails"
                 }
               }
             },
@@ -83,7 +83,8 @@
             "type": "string"
           },
           "url": {
-            "type": "string"
+            "type": "string",
+            "format": "uri"
           },
           "errorCount": {
             "type": "integer"
@@ -95,48 +96,46 @@
         "required": [
           "name",
           "url",
-          "errorcount",
+          "errorCount",
           "criticalCount"
         ]
       },
       "RepoDetails": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Repo"
           },
-          "url": {
-            "type": "string"
-          },
-          "errors": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "deploymentNames": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "environments": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "deploymentConsistent": {
-            "type": "boolean"
+          {
+            "type": "object",
+            "properties": {
+              "deploymentNames": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "environments": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "deploymentConsistent": {
+                "type": "boolean"
+              },
+              "errors": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "deploymentNames",
+              "environments",
+              "deploymentConsistent"
+            ]
           }
-        },
-        "required": [
-          "name",
-          "url",
-          "errors",
-          "deploymentNames",
-          "environments",
-          "deploymentConsistent"
         ]
       },
       "User": {
