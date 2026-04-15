@@ -1,4 +1,4 @@
-import {ErrorMessage, List, Skeleton} from "@navikt/ds-react";
+import {Accordion, BodyShort, ErrorMessage, List, Skeleton} from "@navikt/ds-react";
 import {useEffect, useState} from "react";
 import {RepoApi} from "../api.ts";
 import type {Repo} from "../api.ts";
@@ -13,11 +13,45 @@ const api = new RepoApi(
     })
 );
 
+type RepoDetailsState = {
+    loading: boolean;
+    data?: Repo;
+    error?: string;
+};
 
 export default function RepoList() {
     const [repos, setRepos] = useState<Repo[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [repoDetails, setRepoDetails] = useState<Record<string, RepoDetailsState>>({});
+
+    const loadRepoDetails = async (repoName: string) => {
+        if (repoDetails[repoName]?.loading || repoDetails[repoName]?.data) {
+            return;
+        } else {
+            setRepoDetails(old => ({
+                ...old,
+                [repoName]: {loading: true}
+            }));
+
+            try {
+                const response = await api.apiRepoRepoNameGet({name: repoName});
+                setRepoDetails(old => ({
+                    ...old,
+                    [repoName]: {loading: false, data: response.data}
+                }));
+            } catch (e) {
+                setRepoDetails(old => ({
+                    ...old,
+                    [repoName]: {
+                        loading: false,
+                        error: "Kunne ikke hente data"
+                    }
+                }));
+            }
+
+        }
+    };
 
     useEffect(() => {
         api.apiRepoGet({})
@@ -48,11 +82,39 @@ export default function RepoList() {
 
     return (
         <>
-            <List size="small">
-                {repos.map((repo, index) => (
-                    <List.Item key={index}>{repo.name}</List.Item>
-                ))}
-            </List>
+            <Accordion>
+                {repos.map((repo) => {
+                    const expandedRepo = repoDetails[repo.name];
+                    return (
+                        <Accordion.Item key={repo.name} onOpenChange={(open) => {
+                            if (open) {
+                                loadRepoDetails(repo.name);
+                            }
+                        }}>
+                            <Accordion.Header>
+                                {repo.name}
+                            </Accordion.Header>
+                            <Accordion.Content>
+                                {!expandedRepo || expandedRepo.loading ? (
+                                    <Skeleton>
+                                        <BodyShort>Lorem ipsum</BodyShort>
+                                    </Skeleton>
+                                ) : expandedRepo.error ? (
+                                        <ErrorMessage>{expandedRepo.error}</ErrorMessage>
+                                    )
+                                    : (
+                                        <>
+                                            <BodyShort>
+                                                Miljøer: {expandedRepo.data?.environments}
+                                            </BodyShort>
+                                        </>
+                                    )}
+                            </Accordion.Content>
+                        </Accordion.Item>
+                    )
+                })
+                }
+            </Accordion>
         </>
     );
 }
