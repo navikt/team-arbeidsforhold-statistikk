@@ -7,11 +7,11 @@
   },
   "servers": [
     {
-      "url": "/api"
+      "url": "/"
     }
   ],
   "paths": {
-    "/repo": {
+    "/api/repo": {
       "get": {
         "responses": {
           "200": {
@@ -30,7 +30,7 @@
         }
       }
     },
-    "/repo/{repoName}": {
+    "/api/repo/{repoName}": {
       "get": {
         "parameters": [
           {
@@ -57,7 +57,7 @@
         }
       }
     },
-    "/me": {
+    "/api/me": {
       "get": {
         "responses": {
           "200": {
