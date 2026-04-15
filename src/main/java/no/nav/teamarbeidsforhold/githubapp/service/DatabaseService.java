@@ -199,6 +199,6 @@ public class DatabaseService {
 
     public RepoDetails repoMedNavn(final String repoName) {
         final List<Deployment> mineDeployments = alleDeployments().stream().filter(d -> d.getId().getWorkloadName().startsWith(repoName) && d.getId().getWorkloadName().substring(repoName.length()).matches("-\\w\\d")).toList();
-        return new RepoDetails(repoName, URI.create("https://github.com/" + repoName), 0, Math.min(mineDeployments.size() - 2, 0), mineDeployments.stream().map(Deployment::getId).map(DeploymentId::getWorkloadName).distinct().toList(), mineDeployments.stream().map(Deployment::getId).map(DeploymentId::getEnvironment).distinct().toList(), true);
+        return new RepoDetails(repoName, URI.create("https://github.com/" + repoName), 0, Math.min(mineDeployments.size() - 2, 0), mineDeployments.stream().map(Deployment::getId).map(DeploymentId::getWorkloadName).distinct().toList(), mineDeployments.stream().map(Deployment::getId).map(DeploymentId::getEnvironment).distinct().toList(), !mineDeployments.isEmpty());
     }
 }
