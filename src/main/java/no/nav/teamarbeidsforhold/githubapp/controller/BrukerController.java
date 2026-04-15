@@ -17,8 +17,8 @@ public final class BrukerController implements MeApi {
         final Authentication bruker = SecurityContextHolder.getContext().getAuthentication();
         final User user;
         if (bruker != null && bruker.getPrincipal() instanceof Jwt jwt) {
-            user = new User(jwt.getSubject());
-            user.setDebug("claims=" + jwt.getClaims() + ",audience=" + jwt.getAudience());
+            user = new User(jwt.getClaimAsString("name"));
+            user.setDebug(jwt.getClaimAsString("preferred_username (NAVident: " + jwt.getClaimAsString("NAVident") + ")"));
         } else {
             user = new User("Ukjent");
             if (bruker == null) {
