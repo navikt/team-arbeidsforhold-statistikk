@@ -4,8 +4,15 @@ import {useEffect, useState} from "react";
 import {MeApi} from "../api.ts";
 import type {User} from "../api.ts";
 import type {AxiosResponse} from "axios";
+import axios from "axios";
 
-const api = new MeApi();
+const api = new MeApi(
+    undefined,
+    undefined,
+    axios.create({
+        baseURL: window.location.origin,
+    })
+);
 
 export function Me() {
     const [user, setUser] = useState<User | null>(null);

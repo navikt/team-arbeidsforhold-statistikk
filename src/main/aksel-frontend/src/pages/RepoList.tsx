@@ -3,8 +3,15 @@ import {useEffect, useState} from "react";
 import {RepoApi} from "../api.ts";
 import type {Repo} from "../api.ts";
 import type {AxiosResponse} from "axios";
+import axios from "axios";
 
-const api = new RepoApi();
+const api = new RepoApi(
+    undefined,
+    undefined,
+    axios.create({
+        baseURL: window.location.origin,
+    })
+);
 
 
 export default function RepoList() {
