@@ -190,10 +190,10 @@
                             <generatorName>typescript-axios</generatorName>
                             <inputSpec>${basedir}/src/main/resources/openapi/openapi.json</inputSpec>
                             <output>${project.build.directory}/aksel-frontend/src</output>
-
                             <additionalProperties>
                                 <useSingleRequestParameter>true</useSingleRequestParameter>
                                 <withSeparateModelsAndApi>true</withSeparateModelsAndApi>
+                                <modelPropertyNaming>camelCase</modelPropertyNaming>
                                 <withoutRuntimeChecks>true</withoutRuntimeChecks>
                                 <stringEnums>true</stringEnums>
                                 <enumNameSuffix/>
@@ -221,6 +221,7 @@
                             <apiPackage>no.nav.teamarbeidsforhold.githubapp.generert.api</apiPackage>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
+                                <useTags>true</useTags>
                                 <skipDefaultInterface>true</skipDefaultInterface>
                                 <openApiNullable>false</openApiNullable>
                             </configOptions>

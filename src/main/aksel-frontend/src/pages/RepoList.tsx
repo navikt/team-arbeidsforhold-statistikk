@@ -1,10 +1,10 @@
 import {ErrorMessage, List, Skeleton} from "@navikt/ds-react";
 import {useEffect, useState} from "react";
-import {DefaultApi} from "../api.ts";
+import {RepoApi} from "../api.ts";
 import type {Repo} from "../api.ts";
 import type {AxiosResponse} from "axios";
 
-const api = new DefaultApi();
+const api = new RepoApi();
 
 
 export default function RepoList() {
@@ -13,7 +13,7 @@ export default function RepoList() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        api.repoGet({})
+        api.apiRepoGet({})
             .then((response: AxiosResponse<Repo[]>) => {
                 setRepos(response.data);
             })

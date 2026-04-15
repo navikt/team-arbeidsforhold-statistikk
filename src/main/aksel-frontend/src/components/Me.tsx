@@ -1,11 +1,11 @@
 import {ErrorMessage, InternalHeader, Loader} from "@navikt/ds-react";
 
 import {useEffect, useState} from "react";
-import {DefaultApi} from "../api.ts";
+import {MeApi} from "../api.ts";
 import type {User} from "../api.ts";
 import type {AxiosResponse} from "axios";
 
-const api = new DefaultApi();
+const api = new MeApi();
 
 export function Me() {
     const [user, setUser] = useState<User | null>(null);
@@ -13,7 +13,7 @@ export function Me() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        api.meGet({})
+        api.apiMeGet({})
             .then((response: AxiosResponse<User>) => {
                 setUser(response.data);
             })

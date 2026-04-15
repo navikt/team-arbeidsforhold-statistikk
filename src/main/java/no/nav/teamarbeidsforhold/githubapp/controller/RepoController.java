@@ -21,14 +21,15 @@ public class RepoController implements RepoApi {
         this.githubService = githubService;
         this.databaseService = databaseService;
     }
+
     @Override
-    public ResponseEntity<List<Repo>> repoGet() {
+    public ResponseEntity<List<Repo>> apiRepoGet() {
         githubService.prøvOppdater();
         return ok(databaseService.alleRepoer());
     }
 
     @Override
-    public ResponseEntity<RepoDetails> repoRepoNameGet(final String repoName) {
+    public ResponseEntity<RepoDetails> apiRepoRepoNameGet(final String repoName) {
         githubService.prøvOppdater();
         return ok(databaseService.repoMedNavn(repoName));
     }

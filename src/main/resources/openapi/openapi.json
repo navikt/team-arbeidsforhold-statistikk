@@ -5,6 +5,16 @@
     "description": "Team arbeidsforhold statistikk api",
     "version": "1.0.0"
   },
+  "tags": [
+    {
+      "name": "repo",
+      "description": "Api for repoer"
+    },
+    {
+      "name": "me",
+      "description": "Api for info om innlogget bruker"
+    }
+  ],
   "servers": [
     {
       "url": "/"
@@ -13,6 +23,7 @@
   "paths": {
     "/api/repo": {
       "get": {
+        "tags": ["repo"],
         "responses": {
           "200": {
             "content": {
@@ -32,6 +43,7 @@
     },
     "/api/repo/{repoName}": {
       "get": {
+        "tags": ["repo"],
         "parameters": [
           {
             "in": "path",
@@ -59,6 +71,7 @@
     },
     "/api/me": {
       "get": {
+        "tags": ["me"],
         "responses": {
           "200": {
             "content": {
