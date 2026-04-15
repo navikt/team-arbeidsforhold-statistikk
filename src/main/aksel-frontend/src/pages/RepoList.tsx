@@ -1,7 +1,7 @@
 import {Accordion, BodyShort, ErrorMessage, List, Skeleton} from "@navikt/ds-react";
 import {useEffect, useState} from "react";
 import {RepoApi} from "../api.ts";
-import type {Repo} from "../api.ts";
+import type {Repo, RepoDetails} from "../api.ts";
 import type {AxiosResponse} from "axios";
 import axios from "axios";
 
@@ -15,7 +15,7 @@ const api = new RepoApi(
 
 type RepoDetailsState = {
     loading: boolean;
-    data?: Repo;
+    data?: RepoDetails;
     error?: string;
 };
 
