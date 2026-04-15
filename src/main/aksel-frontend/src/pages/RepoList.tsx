@@ -35,7 +35,7 @@ export default function RepoList() {
             }));
 
             try {
-                const response = await api.apiRepoRepoNameGet({name: repoName});
+                const response = await api.apiRepoRepoNameGet(repoName);
                 setRepoDetails(old => ({
                     ...old,
                     [repoName]: {loading: false, data: response.data}
