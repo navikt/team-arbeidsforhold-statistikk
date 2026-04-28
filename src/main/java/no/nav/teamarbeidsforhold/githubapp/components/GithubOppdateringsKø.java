@@ -1,4 +1,4 @@
-package no.nav.teamarbeidsforhold.githubapp.service;
+package no.nav.teamarbeidsforhold.githubapp.components;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -14,13 +14,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 @Slf4j
 @Component
-public class GithubService {
+public class GithubOppdateringsKø {
     private final BlockingQueue<GithubOppdatering> queue = new LinkedBlockingQueue<>(100);
     private final Executor executor;
     private final TransactionTemplate transactionTemplate;
     private final GitHub api;
 
-    public GithubService(@Qualifier("github") final Executor executor, final TransactionTemplate transactionTemplate, final GitHub api) {
+    public GithubOppdateringsKø(@Qualifier("github") final Executor executor, final TransactionTemplate transactionTemplate, final GitHub api) {
         this.executor = executor;
         this.transactionTemplate = transactionTemplate;
         this.api = api;

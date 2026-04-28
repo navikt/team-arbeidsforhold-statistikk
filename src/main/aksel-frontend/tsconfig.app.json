@@ -21,5 +21,8 @@
     "erasableSyntaxOnly": false,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "../../../target/generated-sources/openapi/src"
+  ]
 }

@@ -1,4 +1,4 @@
-package no.nav.teamarbeidsforhold.githubapp.service;
+package no.nav.teamarbeidsforhold.githubapp.components;
 
 import no.nav.teamarbeidsforhold.githubapp.entity.Deployment;
 import no.nav.teamarbeidsforhold.githubapp.entity.DeploymentId;
@@ -17,20 +17,20 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class DatabaseServiceTest {
+class LagringTest {
     @Mock
     RepoRepository repoRepository;
     @InjectMocks
-    DatabaseService databaseService;
+    Lagring lagring;
 
     @Test
     void alleDeploymentsInneholderRepo() {
-        final List<Deployment> deployments = databaseService.alleDeployments();
-        final List<Repo> repos = databaseService.alleRepoer();
+        final List<Deployment> deployments = lagring.alleDeployments();
+        final List<Repo> repos = lagring.alleRepoer();
         assertFalse(deployments.isEmpty());
         final Map<Boolean, List<Deployment>> split = deployments.stream().collect(Collectors.partitioningBy(deployment -> repos.stream().anyMatch(repo -> deployment.getId().getWorkloadName().startsWith(repo.getName()))));
         assertFalse(split.get(true).stream().map(Deployment::getId).map(DeploymentId::getWorkloadName).toList().isEmpty());
         assertFalse(split.get(false).stream().map(Deployment::getId).map(DeploymentId::getWorkloadName).toList().isEmpty());
-        assertTrue(databaseService.repoMedNavn("ereg-services").getEnvironments().containsAll(List.of("dev-fss","prod-fss")));
+        assertTrue(lagring.repoMedNavn("ereg-services").getEnvironments().containsAll(List.of("dev-fss","prod-fss")));
     }
 }

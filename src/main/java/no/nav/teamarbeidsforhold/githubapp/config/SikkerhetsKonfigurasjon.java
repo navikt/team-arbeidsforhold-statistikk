@@ -1,4 +1,4 @@
-package no.nav.teamarbeidsforhold.githubapp;
+package no.nav.teamarbeidsforhold.githubapp.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

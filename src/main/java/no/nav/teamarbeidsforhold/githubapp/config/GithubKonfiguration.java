@@ -1,9 +1,11 @@
-package no.nav.teamarbeidsforhold.githubapp;
+package no.nav.teamarbeidsforhold.githubapp.config;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.JWK;
 import org.kohsuke.github.GitHub;
+import org.kohsuke.github.GitHubAbuseLimitHandler;
 import org.kohsuke.github.GitHubBuilder;
+import org.kohsuke.github.GitHubRateLimitHandler;
 import org.kohsuke.github.authorization.AppInstallationAuthorizationProvider;
 import org.kohsuke.github.extras.authorization.JWTTokenProvider;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,12 +17,16 @@ import java.security.PrivateKey;
 import java.util.function.Supplier;
 
 @Configuration
-public class GithubConfiguration {
+public class GithubKonfiguration {
     public static final String ORG_NAVN = "navikt";
 
     @Bean
     public GitHub github(final AppInstallationAuthorizationProvider autentiserer) throws IOException {
-        return new GitHubBuilder().withAuthorizationProvider(autentiserer).build();
+        return new GitHubBuilder()
+                .withAuthorizationProvider(autentiserer)
+                .withRateLimitHandler(GitHubRateLimitHandler.WAIT)
+                .withAbuseLimitHandler(GitHubAbuseLimitHandler.WAIT)
+                .build();
     }
 
     @Bean

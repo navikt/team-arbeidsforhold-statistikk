@@ -1,4 +1,4 @@
-package no.nav.teamarbeidsforhold.githubapp.service;
+package no.nav.teamarbeidsforhold.githubapp.components;
 
 import no.nav.teamarbeidsforhold.githubapp.entity.Deployment;
 import no.nav.teamarbeidsforhold.githubapp.entity.DeploymentId;
@@ -6,7 +6,6 @@ import no.nav.teamarbeidsforhold.githubapp.generert.modell.Repo;
 import no.nav.teamarbeidsforhold.githubapp.generert.modell.RepoDetails;
 import no.nav.teamarbeidsforhold.githubapp.repository.RepoRepository;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
@@ -17,10 +16,10 @@ import java.util.regex.Pattern;
 
 @Component
 @Transactional
-public class DatabaseService {
+public class Lagring {
     private final RepoRepository repoRepository;
 
-    public DatabaseService(final RepoRepository repoRepository) {
+    public Lagring(final RepoRepository repoRepository) {
         this.repoRepository = repoRepository;
     }
 
