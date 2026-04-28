@@ -5,6 +5,7 @@ import no.nav.teamarbeidsforhold.githubapp.entity.DeploymentId;
 import no.nav.teamarbeidsforhold.githubapp.generert.modell.Repo;
 import no.nav.teamarbeidsforhold.githubapp.generert.modell.RepoDetails;
 import no.nav.teamarbeidsforhold.githubapp.repository.RepoRepository;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
-@Service
+@Component
 @Transactional
 public class DatabaseService {
     private final RepoRepository repoRepository;
