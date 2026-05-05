@@ -20,7 +20,7 @@ target/
 
 ### VS Code ###
 .vscode/
-
+.vs/
 ### Div maven ###
 pom.xml.tag
 pom.xml.releaseBackup
