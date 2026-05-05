@@ -69,6 +69,34 @@
         }
       }
     },
+    "/api/vulnerabilities/critical": {
+      "get": {
+        "tags": ["vulnerability"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "integer"
+            },
+            "required": false,
+            "description": "Antall"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Vulnerability"
+                }
+              }
+            },
+            "description": "Kritiske sårbarheter"
+          }
+        }
+      }
+    },
     "/api/me": {
       "get": {
         "tags": ["me"],
@@ -150,6 +178,14 @@
             ]
           }
         ]
+      },
+      "Vulnerability": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
       },
       "User": {
         "type": "object",
