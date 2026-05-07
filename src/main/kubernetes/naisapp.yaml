@@ -7,7 +7,7 @@ metadata:
     team: arbeidsforhold
 spec:
   ingresses:
-    - https://team-arbeidsforhold-statistikk.ansatt.dev.nav.no
+    - {{ ingress }}
   port: 8080
   replicas:
     max: 2
@@ -27,8 +27,7 @@ spec:
       allowAllUsers: false
       claims:
         groups:
-          - id: "08d977f5-0fba-4079-991f-e392f6e63013"
-          - id: "928636f4-fd0d-4149-978e-a6fb68bb19de"
+          - id: {{ access_group }}
     sidecar:
       enabled: true
       autoLogin: true
@@ -37,3 +36,6 @@ spec:
       rules:
         - application: azure-token-generator
           namespace: nais
+    outbound:
+      external:
+        - host: api.github.com

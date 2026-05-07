@@ -1,1 +1,3 @@
-azure_tenant: nav.no
+azure_tenant: "nav.no"
+access_group: "08d977f5-0fba-4079-991f-e392f6e63013"
+ingress: "https://team-arbeidsforhold-statistikk.ansatt.nav.no"

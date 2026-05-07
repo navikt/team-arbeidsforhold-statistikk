@@ -36,7 +36,7 @@ jobs:
         with:
           team: arbeidsforhold
           dockerfile: src/main/docker/Dockerfile
-      - name: Deploy to Nais
+      - name: Deploy to dev
         uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp

@@ -1,1 +1,3 @@
-azure_tenant: trygdeetaten.no
+azure_tenant: "trygdeetaten.no"
+access_group: "928636f4-fd0d-4149-978e-a6fb68bb19de"
+ingress: "https://team-arbeidsforhold-statistikk.ansatt.dev.nav.no"
