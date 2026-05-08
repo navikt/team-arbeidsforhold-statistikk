@@ -9,6 +9,7 @@ import org.kohsuke.github.GitHub;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,7 @@ public final class FinnRepoer implements GithubOppdatering {
         for (final GHRepository repo : api.getOrganization("navikt").getTeamBySlug("arbeidsforhold").listRepositories()) {
             nye.put(repo.getFullName(), repo);
         }
+        final Instant nå = Instant.now();
         gamle.forEach((navn, repo) -> {
             if (nye.containsKey(navn)) {
                 final GHRepository nyeData = nye.get(repo.getFullName());
@@ -46,8 +48,13 @@ public final class FinnRepoer implements GithubOppdatering {
         final List<Repo> lagNyeRepo = new  ArrayList<>();
         nye.forEach((repo, gitRepo) -> {
             if (!gamle.containsKey(repo)) {
-                lagNyeRepo.add(new Repo());
+                final Repo nyttRepo = new Repo();
+                nyttRepo.setCloneUrl(gitRepo.getHttpTransportUrl());
+                nyttRepo.setFullName(gitRepo.getFullName());
+                nyttRepo.setLastSeen(nå);
+                lagNyeRepo.add(nyttRepo);
             }
         });
+        repository.saveAll(lagNyeRepo);
     }
 }
