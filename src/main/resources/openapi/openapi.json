@@ -93,9 +93,11 @@
           "200": {
             "content": {
               "application/json": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/Vulnerability"
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Vulnerability"
+                  }
                 }
               }
             },
