@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
-public final class BrukerController implements MeApi {
+public class BrukerController implements MeApi {
     @Override
     public ResponseEntity<User> apiMeGet() {
         final Authentication bruker = SecurityContextHolder.getContext().getAuthentication();
