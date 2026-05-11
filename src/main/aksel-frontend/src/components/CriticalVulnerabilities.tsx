@@ -19,7 +19,7 @@ export function CriticalVulnerabilities() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        api.apiVulnerabilitiesCriticalGet({})
+        api.apiVulnerabilitiesCriticalGet()
             .then((response: AxiosResponse<Vulnerability[]>) => {
                 setVulnerabilities(response.data);
             })
