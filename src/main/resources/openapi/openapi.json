@@ -23,7 +23,9 @@
   "paths": {
     "/api/repo": {
       "get": {
-        "tags": ["repo"],
+        "tags": [
+          "repo"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -43,7 +45,9 @@
     },
     "/api/repo/{repoName}": {
       "get": {
-        "tags": ["repo"],
+        "tags": [
+          "repo"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -71,7 +75,9 @@
     },
     "/api/vulnerabilities/critical": {
       "get": {
-        "tags": ["vulnerability"],
+        "tags": [
+          "vulnerability"
+        ],
         "parameters": [
           {
             "in": "query",
@@ -99,7 +105,9 @@
     },
     "/api/me": {
       "get": {
-        "tags": ["me"],
+        "tags": [
+          "me"
+        ],
         "responses": {
           "200": {
             "content": {
