@@ -5,7 +5,7 @@ spring:
     url: jdbc:h2:mem:testdb
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     show-sql: true
   liquibase:
     enabled: true
