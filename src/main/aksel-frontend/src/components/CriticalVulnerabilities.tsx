@@ -2,7 +2,7 @@ import {BodyShort, ErrorMessage, Heading, HStack, Loader, Tag, VStack} from "@na
 
 import {useEffect, useState} from "react";
 import {VulnerabilityApi} from "../api.ts";
-import type {Vulnerability} from "../api.ts";
+import type {CriticalVulnerability} from "../api.ts";
 import axios, {type AxiosResponse} from "axios";
 
 const api = new VulnerabilityApi(
@@ -14,13 +14,13 @@ const api = new VulnerabilityApi(
 );
 
 export function CriticalVulnerabilities() {
-    const [vulnerabilities, setVulnerabilities] = useState<Vulnerability[]>([]);
+    const [vulnerabilities, setVulnerabilities] = useState<CriticalVulnerability[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        api.apiVulnerabilitiesCriticalGet()
-            .then((response: AxiosResponse<Vulnerability[]>) => {
+        api.apiVulnerabilityCriticalGet()
+            .then((response: AxiosResponse<CriticalVulnerability[]>) => {
                 setVulnerabilities(response.data);
             })
             .catch((err: unknown) => {

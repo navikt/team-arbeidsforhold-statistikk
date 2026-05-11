@@ -73,7 +73,7 @@
         }
       }
     },
-    "/api/vulnerabilities/critical": {
+    "/api/vulnerability/critical": {
       "get": {
         "tags": [
           "vulnerability"
@@ -96,7 +96,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Vulnerability"
+                    "$ref": "#/components/schemas/CriticalVulnerability"
                   }
                 }
               }
@@ -197,6 +197,25 @@
             "type": "string"
           }
         }
+      },
+      "CriticalVulnerability": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Vulnerability"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "affectedRepositories": {
+                "type": "integer",
+                "description": "Repoer påvirket"
+              }
+            },
+            "required": [
+              "affectedRepositories"
+            ]
+          }
+        ]
       },
       "User": {
         "type": "object",
