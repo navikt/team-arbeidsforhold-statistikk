@@ -2,7 +2,7 @@ package main
 
 import (
     "context"
-    "io"
+    "errors"
     "log"
     "net/http"
     "os"
@@ -24,17 +24,6 @@ func scanHandler(w http.ResponseWriter, r *http.Request) {
     r.Body = http.MaxBytesReader(w, r.Body, maxUploadSize)
     defer r.Body.Close()
 
-    tmp, err := os.CreateTemp("", "trivy-input-*")
-    if err != nil {
-        http.Error(w, "failed to create temp file", http.StatusInternalServerError)
-        return
-    }
-    defer os.Remove(tmp.Name())
-
-    if _, err := io.Copy(tmp, r.Body); err != nil {
-        http.Error(w, "failed to read body", http.StatusBadRequest)
-        return
-    }
 
     ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
     defer cancel()
@@ -43,18 +32,24 @@ func scanHandler(w http.ResponseWriter, r *http.Request) {
         ctx,
         "trivy",
         "fs",
-        tmp.Name(),
+        "-", // read from stdin
         "--format", "json",
         "--quiet",
     )
+
+    cmd.Stdin = r.Body
 
     w.Header().Set("Content-Type", "application/json")
     cmd.Stdout = w
     cmd.Stderr = os.Stderr
 
     if err := cmd.Run(); err != nil {
-        // Trivy uses non-zero exit codes for findings; do not treat as server error
-        log.Printf("trivy exited with error: %v", err)
+        if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+            http.Error(w, "scan timeout", http.StatusGatewayTimeout)
+            return
+        }
+        http.Error(w, "Trivy run failed", http.StatusBadGateway)
+        return
     }
 }
 
