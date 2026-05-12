@@ -1,4 +1,5 @@
-import { List, Heading } from "@navikt/ds-react";
+import { List } from "@navikt/ds-react";
+import {CriticalVulnerabilities} from "../components/CriticalVulnerabilities.tsx";
 
 const items = [
     "First item",
@@ -6,12 +7,10 @@ const items = [
     "Third item",
 ];
 
-export default function SimpleList() {
+export default function FrontPage() {
     return (
         <>
-            <Heading level="2" size="medium" spacing>
-                Static list
-            </Heading>
+            <CriticalVulnerabilities/>
 
             <List size="small">
                 {items.map((item, index) => (
