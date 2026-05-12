@@ -5,7 +5,7 @@ COPY src/main/go/main.go .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build -trimpath -ldflags="-s -w" -o wrapper
 
-FROM aquasecurity/trivy:latest
+FROM ghcr.io/aquasecurity/trivy:latest
 
 COPY --from=builder /src/wrapper /wrapper
 
