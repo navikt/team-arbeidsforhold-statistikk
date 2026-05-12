@@ -43,16 +43,16 @@ jobs:
         with:
           team: arbeidsforhold
           dockerfile: src/main/docker/trivy.Dockerfile
-      - name: Deploy app to dev
+      - name: Deploy app to prod
         uses: nais/deploy/actions/deploy@v2
         env:
-          CLUSTER: dev-gcp
+          CLUSTER: prod-gcp
           RESOURCE: src/main/kubernetes/postgres.yaml,src/main/kubernetes/naisapp.yaml
           WORKLOAD_IMAGE: ${{ steps.docker-build-push.outputs.image }}
-          VARS: src/main/kubernetes/preprod.yaml
-      - name: Deploy service to dev
+          VARS: src/main/kubernetes/prod.yaml
+      - name: Deploy trivy service to prod
         uses: nais/deploy/actions/deploy@v2
         env:
-          CLUSTER: dev-gcp
+          CLUSTER: prod-gcp
           RESOURCE: src/main/kubernetes/trivy-naisapp.yaml
           WORKLOAD_IMAGE: ${{ steps.docker-build-push-trivy.outputs.image }}
