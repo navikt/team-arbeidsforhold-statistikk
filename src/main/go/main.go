@@ -35,6 +35,10 @@ func scanHandler(w http.ResponseWriter, r *http.Request) {
         "-", // read from stdin
         "--format", "json",
         "--quiet",
+        "--scanners", "vuln",
+        "--disable-telemetry",
+        "--offline-scan",
+        "--skip-db-update",
     )
 
     cmd.Stdin = r.Body
