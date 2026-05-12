@@ -1,0 +1,20 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: team-arbeidsforhold-statistikk-trivy
+  namespace: arbeidsforhold
+  labels:
+    team: arbeidsforhold
+spec:
+  port: 8080
+  replicas:
+    max: 4
+    min: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 32Mi
+  accessPolicy:
+    inbound:
+      rules:
+        - application: team-arbeidsforhold-statistikk

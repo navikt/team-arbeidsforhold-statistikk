@@ -28,18 +28,31 @@ jobs:
         id: changed-files
         uses: "nais/what-changed@main"
         with:
-          files: "README,LICENSE,.gitignore"
-      - name: Build and push image and SBOM to OCI registry
+          files: "README.md,LICENSE,LICENSE.md,CODEOWNERS,.gitignore"
+      - name: Build and push main image and SBOM to OCI registry
         if: steps.changed-files.outputs.changed != 'only-inputs'
         uses: nais/docker-build-push@v0
         id: docker-build-push
         with:
           team: arbeidsforhold
           dockerfile: src/main/docker/Dockerfile
-      - name: Deploy to dev
+      - name: Build and push trivy service image and SBOM to OCI registry
+        if: steps.changed-files.outputs.changed != 'only-inputs'
+        uses: nais/docker-build-push@v0
+        id: docker-build-push-trivy
+        with:
+          team: arbeidsforhold
+          dockerfile: src/main/docker/trivy.Dockerfile
+      - name: Deploy app to dev
         uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
           RESOURCE: src/main/kubernetes/postgres.yaml,src/main/kubernetes/naisapp.yaml
           WORKLOAD_IMAGE: ${{ steps.docker-build-push.outputs.image }}
           VARS: src/main/kubernetes/preprod.yaml
+      - name: Deploy service to dev
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: src/main/kubernetes/trivy-naisapp.yaml
+          WORKLOAD_IMAGE: ${{ steps.docker-build-push-trivy.outputs.image }}
