@@ -1,6 +1,6 @@
 # team-arbeidsforhold-statistikk
 
-Team arbeidsforhold's github-app og oversikt-side. Denne skal være avgrenset til teamet i produksjon, så du burde ikke ha noen problemer med sidene.
+Team arbeidsforhold's github-app og oversikt-side. Appen er avgrenset til teamet i produksjon.
 
 ## Henvendelser
 
