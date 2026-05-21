@@ -25,6 +25,7 @@ public final class FinnRepoer implements GithubOppdatering {
 
     @Override
     public void kjør(final GitHub api) throws IOException {
+        log.info("Spør github om repoer");
         final Map<String, Repo> gamle = repository.findAll().stream().collect(Collectors.groupingBy(Repo::getFullName, HashMap::new, Collectors.collectingAndThen(Collectors.reducing((_, _) -> {
             throw new IllegalArgumentException("Skal være kun ett repo per navn");
         }), optional -> optional.orElseThrow(IllegalArgumentException::new))));
