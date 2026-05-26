@@ -17,7 +17,7 @@ import java.security.PrivateKey;
 import java.util.function.Supplier;
 
 @Configuration
-public class GithubKonfiguration {
+public class GithubKonfigurasjon {
     public static final String ORG_NAVN = "navikt";
 
     @Bean
