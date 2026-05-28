@@ -15,6 +15,7 @@ public final class TrivyKjører {
     public String kjørTrivyPå(final String pomFil) {
         return webClient
                 .post()
+                .uri("/scan")
                 .body(BodyInserters.fromValue(pomFil))
                 .retrieve()
                 .bodyToMono(String.class)
