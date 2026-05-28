@@ -1,19 +1,30 @@
 package no.nav.teamarbeidsforhold.githubapp.entity;
 
-@lombok.Getter
-@lombok.Setter
-@lombok.EqualsAndHashCode@jakarta.persistence.Embeddable
-public class PomId {
-@jakarta.validation.constraints.Size(max = 250)
-@jakarta.validation.constraints.NotNull
-@jakarta.persistence.Column(name = "repo_full_name", nullable = false, length = 250)
-private java.lang.String repoFullName;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
-@jakarta.validation.constraints.Size(max = 250)
-@jakarta.validation.constraints.NotNull
-@jakarta.persistence.Column(name = "path_in_repo", nullable = false, length = 250)
-private java.lang.String pathInRepo;
+import java.io.Serializable;
 
+@Getter
+@Setter
+@EqualsAndHashCode
+@Embeddable
+public class PomId implements Serializable {
+    private static final long serialVersionUID = -335171151987863445L;
+    @Size(max = 250)
+    @NotNull
+    @Column(name = "repo_full_name", nullable = false, length = 250)
+    private String repoFullName;
+
+    @Size(max = 250)
+    @NotNull
+    @Column(name = "path_in_repo", nullable = false, length = 250)
+    private String pathInRepo;
 
 
 }
