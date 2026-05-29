@@ -6,6 +6,7 @@ metadata:
   labels:
     team: arbeidsforhold
 spec:
+  leaderElection: true
   ingresses:
     - {{ ingress }}
   port: 8080
