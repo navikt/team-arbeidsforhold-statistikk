@@ -6,9 +6,10 @@ COPY src/main/go/go.mod .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build -trimpath -ldflags="-s -w" -o wrapper
 
-FROM ghcr.io/aquasecurity/trivy:latest AS trivy-db
-RUN trivy --download-db-only
-RUN trivy --download-java-db-only
+FROM ghcr.io/aquasecurity/trivy:0.70.0 AS trivy-db
+RUN trivy --version
+RUN trivy image --download-db-only
+RUN trivy image --download-java-db-only
 RUN mkdir /empty && trivy fs /empty || true
 RUN ls -R /root/.cache/trivy
 
