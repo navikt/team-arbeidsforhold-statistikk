@@ -21,3 +21,4 @@ app:
   private-key: "Ikke brukt i test, vi mocker denne i TestKeysConfig"
   githubapp:
     id: 0
+elector.sse.url: http://ingen-for-test
