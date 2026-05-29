@@ -12,8 +12,7 @@ RUN trivy fs --download-java-db-only
 
 FROM ghcr.io/aquasecurity/trivy:latest
 
-COPY --from=trivy-db /root/.cache/trivy/db /root/.cache/trivy/db
-COPY --from=trivy-db /root/.cache/trivy/java-db /root/.cache/trivy/java-db
+COPY --from=trivy-db /root/.cache/trivy /root/.cache/trivy
 COPY --from=builder /src/wrapper /wrapper
 
 ENTRYPOINT ["/wrapper"]
