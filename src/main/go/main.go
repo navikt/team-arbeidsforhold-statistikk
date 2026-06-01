@@ -1,10 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"io"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -18,8 +19,22 @@ const (
 	address       = ":8080"
 )
 
+var (
+	trivyDBPath    = getenv("TRIVY_DB_PATH", "/opt/trivy-db")
+	trivyCachePath = getenv("TRIVY_CACHE_PATH", "/tmp/trivy-cache")
+
+	execCommand = exec.CommandContext
+)
+
+func getenv(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
+}
+
 func copyDir(src, dst string) error {
-	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -31,7 +46,7 @@ func copyDir(src, dst string) error {
 
 		target := filepath.Join(dst, rel)
 
-		if info.IsDir() {
+		if d.IsDir() {
 			return os.MkdirAll(target, 0o755)
 		}
 
@@ -39,41 +54,46 @@ func copyDir(src, dst string) error {
 		if err != nil {
 			return err
 		}
-		defer func() { _ = in.Close() }()
 
 		out, err := os.Create(target)
 		if err != nil {
+			_ = in.Close()
 			return err
 		}
 
-		defer func() {
-			if e := out.Close(); e != nil {
-				_, _ = fmt.Fprintf(os.Stderr, "close error: %v\n", e)
-			}
-		}()
+		_, err = io.Copy(out, in)
 
+		cerr1 := in.Close()
+		cerr2 := out.Close()
 
-		if _, err := io.Copy(out, in); err != nil {
+		if err != nil {
 			return err
 		}
+		if cerr1 != nil {
+			return cerr1
+		}
+		if cerr2 != nil {
+			return cerr2
+		}
 
-		return out.Sync()
+		return nil
 	})
 }
 
 func ensureCacheInitialized() error {
-	src := "/opt/trivy-db"
-	dst := "/tmp/trivy-cache"
+	metadata := filepath.Join(trivyCachePath, "db", "metadata.json")
 
-	if _, err := os.Stat(filepath.Join(dst, "db", "metadata.json")); err == nil {
+	if _, err := os.Stat(metadata); err == nil {
 		return nil
 	}
 
-	fmt.Println("Initializing Trivy cache in /tmp...")
+	log.Printf("Initializing cache at %s", trivyCachePath)
 
-	_ = os.RemoveAll(dst)
+	if err := os.RemoveAll(trivyCachePath); err != nil {
+		log.Printf("cleanup failed: %v", err)
+	}
 
-	return copyDir(src, dst)
+	return copyDir(trivyDBPath, trivyCachePath)
 }
 
 func scanHandler(w http.ResponseWriter, r *http.Request) {
@@ -82,17 +102,22 @@ func scanHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.Body == nil {
+		http.Error(w, "empty body", http.StatusBadRequest)
+		return
+	}
+
 	r.Body = http.MaxBytesReader(w, r.Body, maxUploadSize)
-	defer r.Body.Close()
+	defer func(Body io.ReadCloser) { _ = Body.Close() }(r.Body)
 
 	ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
 	defer cancel()
 
-	cmd := exec.CommandContext(
+	cmd := execCommand(
 		ctx,
 		"trivy",
 		"fs",
-		"-", // read from stdin
+		"-",
 		"--format", "json",
 		"--quiet",
 		"--scanners", "vuln",
@@ -102,29 +127,44 @@ func scanHandler(w http.ResponseWriter, r *http.Request) {
 	)
 
 	cmd.Stdin = r.Body
-
-	w.Header().Set("Content-Type", "application/json")
-	cmd.Stdout = w
 	cmd.Stderr = os.Stderr
 
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
 	if err := cmd.Run(); err != nil {
-		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		if errors.Is(err, context.DeadlineExceeded) || ctx.Err() == context.DeadlineExceeded {
 			http.Error(w, "scan timeout", http.StatusGatewayTimeout)
 			return
 		}
-		http.Error(w, "Trivy run failed", http.StatusBadGateway)
+
+		log.Printf("scan failed: %v", err)
+		http.Error(w, "scan failed", http.StatusBadGateway)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(out.Bytes())
 }
 
 func main() {
 	if err := ensureCacheInitialized(); err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "failed to initialize cache: %v\n", err)
+		log.Printf("failed to initialize cache: %v", err)
 		os.Exit(1)
 	}
 
-	http.HandleFunc("/scan", scanHandler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/scan", scanHandler)
+
+	srv := &http.Server{
+		Addr:         address,
+		Handler:      mux,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 60 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
 
 	log.Printf("listening on %s", address)
-	log.Fatal(http.ListenAndServe(address, nil))
+	log.Fatal(srv.ListenAndServe())
 }
