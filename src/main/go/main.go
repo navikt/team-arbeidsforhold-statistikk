@@ -113,11 +113,40 @@ func scanHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
 	defer cancel()
 
+	tmpDir, err := os.MkdirTemp("/tmp", "trivy-*")
+
+	filePath := filepath.Join(tmpDir, "pom.xml")
+	f, err := os.Create(filePath)
+
+	if err != nil {
+		log.Printf("temp file creation failed: %v", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+	defer func() {
+		_ = f.Close()
+		_ = os.Remove(f.Name())
+	}()
+
+	if _, err := io.Copy(f, r.Body); err != nil {
+		log.Printf("write failed: %v", err)
+		http.Error(w, "invalid input", http.StatusBadRequest)
+		return
+	}
+
+	if err := f.Sync(); err != nil {
+		log.Printf("sync failed: %v", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+
+	dir := tmpDir
+
 	cmd := execCommand(
 		ctx,
 		"trivy",
 		"fs",
-		"-",
+		dir,
 		"--format", "json",
 		"--quiet",
 		"--scanners", "vuln",
@@ -126,18 +155,16 @@ func scanHandler(w http.ResponseWriter, r *http.Request) {
 		"--skip-db-update",
 	)
 
-	cmd.Stdin = r.Body
 	cmd.Stderr = os.Stderr
 
 	var out bytes.Buffer
 	cmd.Stdout = &out
 
 	if err := cmd.Run(); err != nil {
-		if errors.Is(err, context.DeadlineExceeded) || ctx.Err() == context.DeadlineExceeded {
+		if errors.Is(err, context.DeadlineExceeded) || errors.Is(ctx.Err(), context.DeadlineExceeded) {
 			http.Error(w, "scan timeout", http.StatusGatewayTimeout)
 			return
 		}
-
 		log.Printf("scan failed: %v", err)
 		http.Error(w, "scan failed", http.StatusBadGateway)
 		return
