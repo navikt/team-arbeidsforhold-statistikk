@@ -21,7 +21,7 @@ const (
 
 var (
 	trivyDBPath    = getenv("TRIVY_DB_PATH", "/opt/trivy-db")
-	trivyCachePath = getenv("TRIVY_CACHE_PATH", "/tmp/trivy-cache")
+	trivyCachePath = getenv("TRIVY_CACHE_DIR", "/tmp/trivy-cache")
 
 	execCommand = exec.CommandContext
 )
