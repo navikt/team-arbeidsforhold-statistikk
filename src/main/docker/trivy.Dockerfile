@@ -10,7 +10,10 @@ FROM ghcr.io/aquasecurity/trivy:0.70.0 AS trivy-db
 RUN trivy image golang:1.26-alpine
 
 FROM ghcr.io/aquasecurity/trivy:0.70.0
-COPY --from=trivy-db /root/.cache/trivy /root/.cache/trivy
+
+ENV TRIVY_CACHE_DIR=/tmp/trivy-cache
+
+COPY --from=trivy-db /root/.cache/trivy /opt/trivy-db
 COPY --from=builder /src/wrapper /wrapper
 
 ENTRYPOINT ["/wrapper"]
