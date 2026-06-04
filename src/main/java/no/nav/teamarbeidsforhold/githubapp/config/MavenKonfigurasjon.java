@@ -15,7 +15,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 @Configuration
-public class MavenConfiguration {
+public class MavenKonfigurasjon {
 
     @Bean
     public RepositorySystem repositorySystem() {

@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.util.function.Supplier;
 
 @Configuration
-public class NaisConfiguration {
+public class NaisKonfigurasjon {
     @Bean
     public Supplier<String> naisToken(@Value("${NAIS_SERVICE_ACCOUNT_TOKEN_PATH:?NAIS_SERVICE_ACCOUNT_TOKEN_PATH manglet}") final String naisApiTokenSti) {
         final Path sti = Path.of(naisApiTokenSti);
