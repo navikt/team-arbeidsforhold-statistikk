@@ -13,6 +13,10 @@
     {
       "name": "me",
       "description": "Api for info om innlogget bruker"
+    },
+    {
+      "name": "admin",
+      "description": "Api for administrasjon (manuell kjøring av cronjobber o.l.)"
     }
   ],
   "servers": [
@@ -121,6 +125,18 @@
               }
             },
             "description": "Den innloggede brukeren"
+          }
+        }
+      }
+    },
+    "/api/admin/nvdjobb": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "202": {
+            "description": "Jobb startet"
           }
         }
       }

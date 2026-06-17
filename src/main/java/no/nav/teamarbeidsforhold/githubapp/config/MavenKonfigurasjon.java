@@ -1,5 +1,6 @@
 package no.nav.teamarbeidsforhold.githubapp.config;
 
+import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.repository.LocalRepository;
@@ -30,7 +31,7 @@ public class MavenKonfigurasjon {
         );
 
         builder.setLocalRepositoryManager(
-                repositorySystem.newLocalRepositoryManager(builder.build(), localRepository)
+                repositorySystem.newLocalRepositoryManager(new DefaultRepositorySystemSession(), localRepository)
         );
 
         builder.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_FAIL);

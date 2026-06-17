@@ -1,5 +1,6 @@
 package no.nav.teamarbeidsforhold.githubapp.components;
 
+import no.nav.teamarbeidsforhold.githubapp.qualifier.TrivyApi;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -8,7 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public final class TrivyKjører {
     private final WebClient webClient;
 
-    public TrivyKjører(final WebClient webClient) {
+    public TrivyKjører(@TrivyApi final WebClient webClient) {
         this.webClient = webClient;
     }
 

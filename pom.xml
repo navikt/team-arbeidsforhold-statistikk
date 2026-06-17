@@ -117,6 +117,11 @@
             <artifactId>cyclonedx-core-java</artifactId>
             <version>12.2.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.graphql-java</groupId>
+            <artifactId>graphql-java</artifactId>
+            <version>26.0</version>
+        </dependency>
 
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -397,41 +402,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>io.github.deweyjose</groupId>
-                <artifactId>graphqlcodegen-maven-plugin</artifactId>
-                <version>3.7.1</version>
-
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-
-                <configuration>
-                    <!-- Schema -->
-                    <schemaPaths>
-                        <param>${project.basedir}/src/main/graphql/schema.graphql</param>
-                    </schemaPaths>
-
-                    <!-- Queries -->
-                    <queryPaths>
-                        <param>${project.basedir}/src/main/graphql/*query.graphql</param>
-                    </queryPaths>
-
-                    <!-- Package -->
-                    <packageName>no.nav.teamarbeidsforhold.githubapp.generert.graphql</packageName>
-
-                    <!-- Keep output small -->
-                    <generateClient>true</generateClient>
-                    <generateDataTypes>true</generateDataTypes>
-
-                    <!-- Avoid extra noise -->
-                    <skipEntityQueries>true</skipEntityQueries>
-                </configuration>
             </plugin>
         </plugins>
     </build>
