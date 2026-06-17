@@ -42,3 +42,4 @@ spec:
         - application: team-arbeidsforhold-statistikk-trivy
       external:
         - host: api.github.com
+        - host: nvd.nist.gov
