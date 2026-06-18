@@ -1,5 +1,6 @@
 package no.nav.teamarbeidsforhold.githubapp.components;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.teamarbeidsforhold.githubapp.config.NvdKonfigurasjon;
 import no.nav.teamarbeidsforhold.githubapp.entity.CveNdvMeta;
@@ -12,11 +13,18 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -25,17 +33,38 @@ import java.util.zip.GZIPInputStream;
 @Slf4j
 @Component
 public class KopierNvdCveData {
+    public static final DateTimeFormatter FORMATTER =
+            new DateTimeFormatterBuilder()
+                    .parseCaseInsensitive()
+                    .append(DateTimeFormatter.ISO_LOCAL_DATE)
+                    .optionalStart()
+                    .appendLiteral('T')
+                    .optionalEnd()
+                    .optionalStart()
+                    .appendLiteral(' ')
+                    .optionalEnd()
+                    .optionalStart()
+                    .append(DateTimeFormatter.ISO_LOCAL_TIME)
+                    .optionalEnd()
+                    .optionalStart()
+                    .appendOffsetId()
+                    .optionalEnd()
+                    .optionalStart()
+                    .appendLiteral('Z')
+                    .optionalEnd()
+                    .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                    .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+                    .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+                    .toFormatter();
+
     private final WebClient webClient;
     private final CveNvdRepository cveNvdRepository;
     private final CveNdvMetaRepository cveNdvMetaRepository;
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private final GzipProcessor gzip;
 
-    public KopierNvdCveData(@NvdApi final WebClient webClient, final CveNvdRepository cveNvdRepository, final CveNdvMetaRepository cveNdvMetaRepository, final GzipProcessor gzip) {
+    public KopierNvdCveData(@NvdApi final WebClient webClient, final CveNvdRepository cveNvdRepository, final CveNdvMetaRepository cveNdvMetaRepository) {
         this.webClient = webClient;
         this.cveNvdRepository = cveNvdRepository;
         this.cveNdvMetaRepository = cveNdvMetaRepository;
-        this.gzip = gzip;
     }
 
     @Async
@@ -60,7 +89,7 @@ public class KopierNvdCveData {
                 final JsonNode cve = v.path("cve");
                 final CveNvd cveNvd = new CveNvd();
                 cveNvd.setCveId(cve.required("id").asString());
-                cveNvd.setPublished(Instant.parse(cve.required("published").stringValue()));
+                cveNvd.setPublished(sjekkDatoType(cve.required("published").stringValue()));
                 cveNvd.setLastModified(Instant.parse(cve.required("lastModified").stringValue()));
                 final JsonNode cvss = cve.path("metrics")
                         .path("cvssMetricV40")
@@ -105,5 +134,14 @@ public class KopierNvdCveData {
             cveNvdRepository.saveAll(cveNvds);
         }
         return CompletableFuture.completedFuture(true);
+    }
+
+    private Instant sjekkDatoType(final String tekst) {
+        final TemporalAccessor tidsData = FORMATTER.parse(tekst);
+        if (tidsData.isSupported(ChronoField.INSTANT_SECONDS)) {
+            return Instant.from(tidsData);
+        } else {
+            return LocalDateTime.from(tidsData).atOffset(ZoneOffset.UTC).toInstant();
+        }
     }
 }
