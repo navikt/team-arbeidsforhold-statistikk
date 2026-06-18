@@ -15,6 +15,10 @@ public class NvdKonfigurasjon {
     @Bean
     @NvdApi
     public WebClient nvdWebClient(final WebClient.Builder builder) {
-        return builder.baseUrl(NVD_ADRESSE).clientConnector(new ReactorClientHttpConnector(HttpClient.create().compress(true))).build();
+        return builder
+                .baseUrl(NVD_ADRESSE)
+                .clientConnector(new ReactorClientHttpConnector(HttpClient.create().compress(true)))
+                .codecs(konfigurator -> konfigurator.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
+                .build();
     }
 }
