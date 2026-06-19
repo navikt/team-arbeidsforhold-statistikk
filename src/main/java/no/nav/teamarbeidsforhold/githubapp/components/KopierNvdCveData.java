@@ -1,6 +1,5 @@
 package no.nav.teamarbeidsforhold.githubapp.components;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.teamarbeidsforhold.githubapp.config.NvdKonfigurasjon;
 import no.nav.teamarbeidsforhold.githubapp.entity.CveNdvMeta;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.json.JsonMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -99,7 +97,7 @@ public class KopierNvdCveData {
                 } else {
                     cveNvd.setCvssVersion(cvss.path("cvssVersion").asString());
                     cveNvd.setVectorString(cvss.path("vectorString").asString());
-                    cveNvd.setBaseScore(new BigDecimal(cvss.path("baseScore").asString()));
+                    cveNvd.setBaseScore(sjekkTall(cvss));
 
 
                     cveNvd.setBaseSeverity(cvss.path("baseSeverity").asString());
@@ -134,6 +132,25 @@ public class KopierNvdCveData {
             cveNvdRepository.saveAll(cveNvds);
         }
         return CompletableFuture.completedFuture(true);
+    }
+
+    private static BigDecimal sjekkTall(final JsonNode cvss) {
+        try {
+            final float primitiv = cvss.path("baseScore").asFloat();
+            return new BigDecimal(primitiv);
+        } catch (final NumberFormatException e) {
+            try {
+                final String tekst = cvss.path("baseScore").asString();
+                if (tekst != null && !tekst.isBlank()) {
+                    log.warn("baseScore var ikke tall, men var \"{}\"", tekst);
+                    return new BigDecimal(tekst);
+                } else {
+                    return null;
+                }
+            } catch (final NumberFormatException e2) {
+                return null;
+            }
+        }
     }
 
     private Instant sjekkDatoType(final String tekst) {
