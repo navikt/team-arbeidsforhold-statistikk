@@ -90,7 +90,7 @@ public class KopierNvdCveData {
                 final CveNvd cveNvd = new CveNvd();
                 cveNvd.setCveId(cve.required("id").asString());
                 cveNvd.setPublished(sjekkDatoType(cve.required("published").stringValue()));
-                cveNvd.setLastModified(Instant.parse(cve.required("lastModified").stringValue()));
+                cveNvd.setLastModified(sjekkDatoType(cve.required("lastModified").stringValue()));
                 final JsonNode cvss = cve.path("metrics")
                         .path("cvssMetricV40")
                         .path(0);
