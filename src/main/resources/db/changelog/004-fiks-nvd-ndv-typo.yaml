@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004
+      author: arbeidsforhold
+      changes:
+        - renameTable:
+            oldTableName: cve_ndv_meta
+            newTableName: cve_nvd_meta
