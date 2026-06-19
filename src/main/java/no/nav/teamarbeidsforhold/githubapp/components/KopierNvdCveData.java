@@ -6,7 +6,7 @@ import no.nav.teamarbeidsforhold.githubapp.entity.CveNdvMeta;
 import no.nav.teamarbeidsforhold.githubapp.entity.CveNvd;
 import no.nav.teamarbeidsforhold.githubapp.qualifier.NvdApi;
 import no.nav.teamarbeidsforhold.githubapp.repository.CveNdvMetaRepository;
-import no.nav.teamarbeidsforhold.githubapp.repository.CveNvdRepository;
+import no.nav.teamarbeidsforhold.githubapp.service.VulnerabilityService;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -56,13 +56,13 @@ public class KopierNvdCveData {
                     .toFormatter();
 
     private final WebClient webClient;
-    private final CveNvdRepository cveNvdRepository;
     private final CveNdvMetaRepository cveNdvMetaRepository;
+    private final VulnerabilityService vulnerabilityService;
 
-    public KopierNvdCveData(@NvdApi final WebClient webClient, final CveNvdRepository cveNvdRepository, final CveNdvMetaRepository cveNdvMetaRepository) {
+    public KopierNvdCveData(@NvdApi final WebClient webClient, final CveNdvMetaRepository cveNdvMetaRepository, final VulnerabilityService vulnerabilityService) {
         this.webClient = webClient;
-        this.cveNvdRepository = cveNvdRepository;
         this.cveNdvMetaRepository = cveNdvMetaRepository;
+        this.vulnerabilityService = vulnerabilityService;
     }
 
     @Async
@@ -129,7 +129,7 @@ public class KopierNvdCveData {
                     cveNvds.add(cveNvd);
                 }
             }
-            cveNvdRepository.saveAll(cveNvds);
+            vulnerabilityService.lagreNvdData(cveNvds);
         }
         return CompletableFuture.completedFuture(true);
     }

@@ -1,9 +1,6 @@
 package no.nav.teamarbeidsforhold.githubapp.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -21,6 +18,11 @@ public class CveNvd {
     @Size(max = 32)
     @Column(name = "cve_id", nullable = false, length = 32)
     private String cveId;
+
+    @MapsId
+    @OneToOne
+    @JoinColumn(name="cve_id")
+    private Vulnerability vulnerability;
 
     @NotNull
     @Column(name = "published", nullable = false)
