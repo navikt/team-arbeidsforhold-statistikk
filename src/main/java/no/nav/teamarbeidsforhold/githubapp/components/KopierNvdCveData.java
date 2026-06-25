@@ -2,10 +2,10 @@ package no.nav.teamarbeidsforhold.githubapp.components;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.teamarbeidsforhold.githubapp.config.NvdKonfigurasjon;
-import no.nav.teamarbeidsforhold.githubapp.entity.CveNdvMeta;
 import no.nav.teamarbeidsforhold.githubapp.entity.CveNvd;
+import no.nav.teamarbeidsforhold.githubapp.entity.CveNvdMeta;
 import no.nav.teamarbeidsforhold.githubapp.qualifier.NvdApi;
-import no.nav.teamarbeidsforhold.githubapp.repository.CveNdvMetaRepository;
+import no.nav.teamarbeidsforhold.githubapp.repository.CveNvdMetaRepository;
 import no.nav.teamarbeidsforhold.githubapp.service.VulnerabilityService;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -59,12 +59,12 @@ public class KopierNvdCveData {
                     .toFormatter();
 
     private final WebClient webClient;
-    private final CveNdvMetaRepository cveNdvMetaRepository;
+    private final CveNvdMetaRepository cveNvdMetaRepository;
     private final VulnerabilityService vulnerabilityService;
 
-    public KopierNvdCveData(@NvdApi final WebClient webClient, final CveNdvMetaRepository cveNdvMetaRepository, final VulnerabilityService vulnerabilityService) {
+    public KopierNvdCveData(@NvdApi final WebClient webClient, final CveNvdMetaRepository cveNvdMetaRepository, final VulnerabilityService vulnerabilityService) {
         this.webClient = webClient;
-        this.cveNdvMetaRepository = cveNdvMetaRepository;
+        this.cveNvdMetaRepository = cveNvdMetaRepository;
         this.vulnerabilityService = vulnerabilityService;
     }
 
@@ -135,7 +135,7 @@ public class KopierNvdCveData {
     }
 
     private boolean indikererMetadataNyeDataOgHvisSåLagreMetadata() throws IOException {
-        final String sisteHash = cveNdvMetaRepository.findTopByOrderByTimestampDesc().map(CveNdvMeta::getSha256).orElse("noe som ikke matcher noen sha256");
+        final String sisteHash = cveNvdMetaRepository.findTopByOrderByTimestampDesc().map(CveNvdMeta::getSha256).orElse("noe som ikke matcher noen sha256");
         final String serverMeta = webClient.get().uri(NvdKonfigurasjon.FILNAVN + ".meta").retrieve().bodyToMono(String.class).block();
         final Properties serverproperties = new Properties();
         serverproperties.load(new StringReader(Objects.requireNonNull(serverMeta)));
@@ -143,10 +143,10 @@ public class KopierNvdCveData {
         if (sisteHash.equals(serverHash)) {
             return false;
         }
-        final CveNdvMeta nyMeta = new CveNdvMeta();
+        final CveNvdMeta nyMeta = new CveNvdMeta();
         nyMeta.setSha256(serverHash);
         nyMeta.setTimestamp(OffsetDateTime.now());
-        cveNdvMetaRepository.save(nyMeta);
+        cveNvdMetaRepository.save(nyMeta);
         return true;
     }
 

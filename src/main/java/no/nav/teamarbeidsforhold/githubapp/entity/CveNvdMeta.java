@@ -14,8 +14,8 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "cve_ndv_meta")
-public class CveNdvMeta {
+@Table(name = "cve_nvd_meta")
+public class CveNvdMeta {
     @Id
     @Size(max = 64)
     @Column(name = "sha256", nullable = false, length = 64)
