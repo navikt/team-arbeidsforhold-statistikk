@@ -5,3 +5,5 @@ databaseChangeLog:
       file: db/changelog/002-lagre-pom-som-xml.yaml
   - include:
       file: db/changelog/003-cve-nvd-tabell.yaml
+  - include:
+      file: db/changelog/004-fiks-nvd-ndv-typo.yaml
