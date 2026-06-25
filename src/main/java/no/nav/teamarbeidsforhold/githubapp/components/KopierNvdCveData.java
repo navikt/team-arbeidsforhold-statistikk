@@ -15,9 +15,11 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -25,6 +27,8 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.GZIPInputStream;
 
@@ -67,11 +71,9 @@ public class KopierNvdCveData {
 
     @Async
     public CompletableFuture<Boolean> kopierNvdCveDataTilDatabase() throws IOException {
-        final String sisteMeta = cveNdvMetaRepository.findTopByOrderByTimestampDesc().map(CveNdvMeta::getSha256).orElse("noe som ikke matcher noen sha256");
-        final String serverMeta = webClient.get().uri(NvdKonfigurasjon.FILNAVN + ".meta").retrieve().bodyToMono(String.class).block();
-        if (sisteMeta.equals(serverMeta)) {
+        if (!indikererMetadataNyeDataOgHvisSåLagreMetadata()) {
             log.info("Data fra NVD har ikke endret seg, gjør ingen oppdatering");
-            return CompletableFuture.completedFuture(false);
+            return CompletableFuture.completedFuture(true);
         }
 
         final byte[] bytes = webClient.get()
@@ -79,8 +81,7 @@ public class KopierNvdCveData {
                 .retrieve()
                 .bodyToMono(byte[].class)
                 .block();
-
-        try (GZIPInputStream gzip = new GZIPInputStream(new ByteArrayInputStream(bytes))) {
+        try (GZIPInputStream gzip = new GZIPInputStream(new ByteArrayInputStream(Objects.requireNonNull(bytes)))) {
             final JsonNode root = new ObjectMapper().readTree(gzip);
             final List<CveNvd> cveNvds = new ArrayList<>();
             for (JsonNode v : root.path("vulnerabilities")) {
@@ -92,8 +93,8 @@ public class KopierNvdCveData {
                 final JsonNode cvss = cve.path("metrics")
                         .path("cvssMetricV40")
                         .path(0);
-                if (cvss == null || cvss.isNull() || cvss.isMissingNode()) {
-                    log.warn("Parsing of cvss 4.0 failed, but continuing, treating it as optional field");
+                if (cvss.isMissingNode()) {
+                    log.warn("Server ga oss ikke cvss for {}", cveNvd.getCveId());
                 } else {
                     cveNvd.setCvssVersion(cvss.path("cvssVersion").asString());
                     cveNvd.setVectorString(cvss.path("vectorString").asString());
@@ -126,12 +127,28 @@ public class KopierNvdCveData {
                     cveNvd.setModifiedVc(cvss.path("modifiedVulnerableConfidentialityImpact").asString());
                     cveNvd.setModifiedVi(cvss.path("modifiedVulnerableIntegrityImpact").asString());
                     cveNvd.setModifiedVa(cvss.path("modifiedVulnerableAvailabilityImpact").asString());
-                    cveNvds.add(cveNvd);
                 }
+                cveNvds.add(cveNvd);
             }
             vulnerabilityService.lagreNvdData(cveNvds);
         }
         return CompletableFuture.completedFuture(true);
+    }
+
+    private boolean indikererMetadataNyeDataOgHvisSåLagreMetadata() throws IOException {
+        final String sisteHash = cveNdvMetaRepository.findTopByOrderByTimestampDesc().map(CveNdvMeta::getSha256).orElse("noe som ikke matcher noen sha256");
+        final String serverMeta = webClient.get().uri(NvdKonfigurasjon.FILNAVN + ".meta").retrieve().bodyToMono(String.class).block();
+        final Properties serverproperties = new Properties();
+        serverproperties.load(new StringReader(Objects.requireNonNull(serverMeta)));
+        final String serverHash = serverproperties.getProperty("sha256");
+        if (sisteHash.equals(serverHash)) {
+            return false;
+        }
+        final CveNdvMeta nyMeta = new CveNdvMeta();
+        nyMeta.setSha256(serverHash);
+        nyMeta.setTimestamp(OffsetDateTime.now());
+        cveNdvMetaRepository.save(nyMeta);
+        return true;
     }
 
     private static BigDecimal sjekkTall(final JsonNode cvss) {
