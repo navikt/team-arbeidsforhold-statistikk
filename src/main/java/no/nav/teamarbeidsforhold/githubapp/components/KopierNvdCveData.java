@@ -16,7 +16,6 @@ import tools.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -90,16 +89,16 @@ public class KopierNvdCveData {
                 cveNvd.setCveId(cve.required("id").asString());
                 cveNvd.setPublished(sjekkDatoType(cve.required("published").stringValue()));
                 cveNvd.setLastModified(sjekkDatoType(cve.required("lastModified").stringValue()));
-                final JsonNode cvss = cve.path("metrics")
-                        .path("cvssMetricV40")
-                        .path(0);
-                if (cvss.isMissingNode()) {
+                final JsonNode cvsser = cve.path("metrics").path("cvssMetricV40");
+                final JsonNode cvss = cvsser.path(0);
+                if (cvsser.size() > 2) {
+                    log.error("Kan ikke håndtere to forskjellige cvss-verdier, vi må skrive kode for å velge/prioritere");
+                } else if (cvss.isMissingNode()) {
                     log.warn("Server ga oss ikke cvss for {}", cveNvd.getCveId());
                 } else {
                     cveNvd.setCvssVersion(cvss.path("cvssVersion").asString());
                     cveNvd.setVectorString(cvss.path("vectorString").asString());
-                    cveNvd.setBaseScore(sjekkTall(cvss));
-
+                    cveNvd.setBaseScore(cvss.path("baseScore").asDecimal(null));
 
                     cveNvd.setBaseSeverity(cvss.path("baseSeverity").asString());
                     cveNvd.setAttackVector(cvss.path("attackVector").asString());
@@ -149,25 +148,6 @@ public class KopierNvdCveData {
         nyMeta.setTimestamp(OffsetDateTime.now());
         cveNdvMetaRepository.save(nyMeta);
         return true;
-    }
-
-    private static BigDecimal sjekkTall(final JsonNode cvss) {
-        try {
-            final float primitiv = cvss.path("baseScore").asFloat();
-            return new BigDecimal(primitiv);
-        } catch (final NumberFormatException e) {
-            try {
-                final String tekst = cvss.path("baseScore").asString();
-                if (tekst != null && !tekst.isBlank()) {
-                    log.warn("baseScore var ikke tall, men var \"{}\"", tekst);
-                    return new BigDecimal(tekst);
-                } else {
-                    return null;
-                }
-            } catch (final NumberFormatException e2) {
-                return null;
-            }
-        }
     }
 
     private Instant sjekkDatoType(final String tekst) {
