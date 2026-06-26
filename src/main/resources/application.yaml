@@ -3,6 +3,10 @@ spring:
     name: team-arbeidsforhold-statistikk
   datasource:
     url: ${PGJDBCURL}
+    hikari:
+      data-source-properties:
+        prepareThreshold: 0
+      minimum-idle: 0
   jpa:
     hibernate:
       ddl-auto: none
