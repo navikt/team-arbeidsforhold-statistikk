@@ -140,6 +140,18 @@
           }
         }
       }
+    },
+    "/api/admin/liquibase/unlock": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Lock removed"
+          }
+        }
+      }
     }
   },
   "components": {

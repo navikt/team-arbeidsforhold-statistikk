@@ -12,16 +12,25 @@ const api = new AdminApi(
 );
 
 export default function AdminPage() {
-    const [loading, setLoading] = useState(false);
-    const handleClick = async (): Promise<void> => {
-        setLoading(true);
+    const [cveLoading, setCveLoading] = useState(false);
+    const [liquibaseLoading, setLiquibaseLoading] = useState(false);
+    const handleCveClick = async (): Promise<void> => {
+        setCveLoading(true);
         await api.apiAdminNvdjobbPost();
-        setLoading(false);
+        setCveLoading(false);
+    }
+    const handleLiquibaseClick = async (): Promise<void> => {
+        setLiquibaseLoading(true);
+        await api.apiAdminLiquibaseUnlockPost();
+        setLiquibaseLoading(false);
     }
 
     return (
         <>
-            <Button data-color="danger" variant="primary" onClick={handleClick} loading={loading}>
+            <Button data-color="danger" variant="primary" onClick={handleCveClick} loading={cveLoading}>
+                Kjør CVE-jobb
+            </Button>
+            <Button data-color="danger" variant="primary" onClick={handleLiquibaseClick} loading={liquibaseLoading}>
                 Kjør CVE-jobb
             </Button>
         </>
