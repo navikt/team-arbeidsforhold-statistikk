@@ -31,7 +31,7 @@ export default function AdminPage() {
                 Kjør CVE-jobb
             </Button>
             <Button data-color="danger" variant="primary" onClick={handleLiquibaseClick} loading={liquibaseLoading}>
-                Kjør CVE-jobb
+                Nullstill lås på liquibase
             </Button>
         </>
     );
