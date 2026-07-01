@@ -24,10 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.GZIPInputStream;
 
@@ -82,11 +79,11 @@ public class KopierNvdCveData {
                 .block();
         try (GZIPInputStream gzip = new GZIPInputStream(new ByteArrayInputStream(Objects.requireNonNull(bytes)))) {
             final JsonNode root = new ObjectMapper().readTree(gzip);
-            final List<CveNvd> cveNvds = new ArrayList<>();
+            final Map<String, CveNvd> cveNvds = new HashMap<>();
             for (JsonNode v : root.path("vulnerabilities")) {
                 final JsonNode cve = v.path("cve");
                 final CveNvd cveNvd = new CveNvd();
-                cveNvd.setCveId(cve.required("id").asString());
+                final String id = cve.required("id").asString();
                 cveNvd.setPublished(sjekkDatoType(cve.required("published").stringValue()));
                 cveNvd.setLastModified(sjekkDatoType(cve.required("lastModified").stringValue()));
                 final JsonNode cvsser = cve.path("metrics").path("cvssMetricV40");
@@ -127,7 +124,7 @@ public class KopierNvdCveData {
                     cveNvd.setModifiedVi(cvss.path("modifiedVulnerableIntegrityImpact").asString());
                     cveNvd.setModifiedVa(cvss.path("modifiedVulnerableAvailabilityImpact").asString());
                 }
-                cveNvds.add(cveNvd);
+                cveNvds.put(id, cveNvd);
             }
             vulnerabilityService.lagreNvdData(cveNvds);
         }
