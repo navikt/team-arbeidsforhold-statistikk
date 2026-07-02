@@ -1,0 +1,48 @@
+query WorkloadsMedCriticalCve {
+    team (slug: "arbeidsforhold") {
+        workloads (
+            filter:{
+                environments: [
+                    "prod-gcp",
+                    "prod-fss"
+                ]
+            }
+        ) {
+            nodes {
+                name
+                deployments {
+                    nodes {
+                        createdAt
+                        commitSha
+                        deployerUsername
+                        repository
+                    }
+                    pageInfo {
+                        totalCount
+                    }
+                }
+                teamEnvironment {
+                    environment {
+                        name
+                    }
+                }
+                image {
+                    name
+                    tag
+                    vulnerabilities(
+                        filter: {
+                            severity: CRITICAL
+                        }
+                    ) {
+                        nodes {
+                            identifier
+                            suppression {
+                                state
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
