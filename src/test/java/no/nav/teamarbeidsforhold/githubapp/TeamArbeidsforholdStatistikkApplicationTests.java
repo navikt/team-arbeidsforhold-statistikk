@@ -3,10 +3,13 @@ package no.nav.teamarbeidsforhold.githubapp;
 import no.nav.teamarbeidsforhold.githubapp.components.GithubOppdateringsKø;
 import no.nav.teamarbeidsforhold.githubapp.components.Lagring;
 import no.nav.teamarbeidsforhold.githubapp.components.TrivyKjører;
+import no.nav.teamarbeidsforhold.githubapp.qualifier.NaisApi;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.graphql.client.GraphQlClient;
+import org.springframework.graphql.client.HttpGraphQlClient;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -22,6 +25,8 @@ class TeamArbeidsforholdStatistikkApplicationTests {
     GithubOppdateringsKø githubOppdateringsKø;
     @Autowired
     Lagring lagring;
+    @Autowired
+    HttpGraphQlClient graphQlClient;
 
     @Test
     void contextLoads() {
