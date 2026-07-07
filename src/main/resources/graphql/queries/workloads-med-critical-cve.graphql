@@ -10,6 +10,9 @@ query WorkloadsMedCriticalCve {
         ) {
             nodes {
                 name
+                manifest {
+                    content
+                }
                 deployments {
                     nodes {
                         createdAt
