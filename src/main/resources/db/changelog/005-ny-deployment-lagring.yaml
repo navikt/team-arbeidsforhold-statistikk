@@ -1,0 +1,51 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005
+      author: arbeidsforhold
+      changes:
+        - addColumn:
+            tableName: deployment
+            columns:
+              - column:
+                  name: suffix
+                  type: VARCHAR(2)
+                  constraints:
+                    nullable: false
+
+        - dropPrimaryKey:
+            tableName: deployment
+
+        - addPrimaryKey:
+            tableName: deployment
+            columnNames: workload_name, suffix, environment
+
+        - addColumn:
+            tableName: deployment
+            columns:
+              - column:
+                  name: last_deployer
+                  type: VARCHAR(250)
+
+        - addColumn:
+            tableName: deployment
+            columns:
+              - column:
+                  name: last_commit
+                  type: VARCHAR(250)
+
+        - addColumn:
+            tableName: deployment
+            columns:
+              - column:
+                  name: last_deploy_time
+                  type: DATETIME
+
+        - addColumn:
+            tableName: deployment
+            columns:
+              - column:
+                  name: manifest
+                  type: TEXT
+
+        - dropTable:
+            tableName: action_deployment_run

@@ -15,20 +15,20 @@ import java.io.Serializable;
 @EqualsAndHashCode
 @Embeddable
 public class DeploymentId implements Serializable {
-    private static final long serialVersionUID = 7365486554740526394L;
+    private static final long serialVersionUID = 6401579845931326095L;
     @Size(max = 250)
     @NotNull
-    @Column(name = "WORKLOAD_NAME", nullable = false, length = 250)
+    @Column(name = "workload_name", nullable = false, length = 250)
     private String workloadName;
 
-    @Size(max = 20)
+    @Size(max = 2)
     @NotNull
-    @Column(name = "WORKLOAD_TYPE", nullable = false, length = 20)
-    private String workloadType;
+    @Column(name = "suffix", nullable = false, length = 2)
+    private String suffix;
 
     @Size(max = 20)
     @NotNull
-    @Column(name = "ENVIRONMENT", nullable = false, length = 20)
+    @Column(name = "environment", nullable = false, length = 20)
     private String environment;
 
 
