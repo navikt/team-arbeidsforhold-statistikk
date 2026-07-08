@@ -5,19 +5,22 @@ import no.nav.teamarbeidsforhold.githubapp.qualifier.TrivyApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.graphql.client.HttpGraphQlClient;
+import org.springframework.graphql.support.DocumentSource;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Supplier;
 
 @Configuration
 public class NaisKonfigurasjon {
-    private static final String NAIS_API_ADRESSE = "https://console.nav.cloud.nais.io/graphql";
-
     @Bean
     @NaisApi
     public Supplier<String> naisToken(@Value("${NAIS_SERVICE_ACCOUNT_TOKEN_PATH:?NAIS_SERVICE_ACCOUNT_TOKEN_PATH manglet}") final String naisApiTokenSti) {
@@ -33,9 +36,9 @@ public class NaisKonfigurasjon {
 
     @Bean
     @NaisApi
-    public WebClient naisWebClient(final WebClient.Builder builder, @NaisApi final Supplier<String> token) {
+    public WebClient naisWebClient(final WebClient.Builder builder, @NaisApi final Supplier<String> token, @Value("${nais.api.url}") final String naisApiUrl) {
         return builder
-                .baseUrl(NAIS_API_ADRESSE)
+                .baseUrl(naisApiUrl)
                 .filter((forespørsel, nesteFilter) ->
                         nesteFilter.exchange(ClientRequest.from(forespørsel).headers(headers -> headers.setBearerAuth(token.get())).build()))
                 .build();
@@ -44,7 +47,8 @@ public class NaisKonfigurasjon {
 
     @Bean
     @NaisApi
-    HttpGraphQlClient externalApiClient(@NaisApi WebClient webClient) {
-        return HttpGraphQlClient.create(webClient);
+    HttpGraphQlClient apiKlient(@NaisApi WebClient webClient) {
+        return HttpGraphQlClient.builder(webClient).documentSource(name -> Mono.fromCallable(() ->
+                new ClassPathResource("graphql/queries/" + name + ".graphql").getContentAsString(StandardCharsets.UTF_8))).build();
     }
 }

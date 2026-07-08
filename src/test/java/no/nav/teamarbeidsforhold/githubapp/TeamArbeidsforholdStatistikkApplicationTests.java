@@ -1,8 +1,6 @@
 package no.nav.teamarbeidsforhold.githubapp;
 
-import no.nav.teamarbeidsforhold.githubapp.components.GithubOppdateringsKø;
-import no.nav.teamarbeidsforhold.githubapp.components.Lagring;
-import no.nav.teamarbeidsforhold.githubapp.components.TrivyKjører;
+import no.nav.teamarbeidsforhold.githubapp.components.*;
 import no.nav.teamarbeidsforhold.githubapp.qualifier.NaisApi;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +24,9 @@ class TeamArbeidsforholdStatistikkApplicationTests {
     @Autowired
     Lagring lagring;
     @Autowired
-    HttpGraphQlClient graphQlClient;
+    KopierNaisApiData kopierNaisApiData;
+    @Autowired
+    KopierNvdCveData kopierNvdCveData;
 
     @Test
     void contextLoads() {

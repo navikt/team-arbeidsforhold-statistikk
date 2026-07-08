@@ -26,3 +26,6 @@ app:
   private-key: ${PRIVATE_KEY}
   githubapp:
     id: 2368111
+nais:
+  api:
+    url: https://console.nav.cloud.nais.io/graphql

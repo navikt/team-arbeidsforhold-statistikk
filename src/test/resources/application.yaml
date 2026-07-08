@@ -22,3 +22,4 @@ app:
   githubapp:
     id: 0
 elector.sse.url: http://ingen-for-test
+nais.api.url: http://ingen-for-test
