@@ -9,3 +9,5 @@ databaseChangeLog:
       file: db/changelog/004-fiks-nvd-ndv-typo.yaml
   - include:
       file: db/changelog/005-ny-deployment-lagring.yaml
+  - include:
+      file: db/changelog/006-kritiske-sårbarheter-per-deployment.yaml
