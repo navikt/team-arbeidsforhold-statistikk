@@ -1,4 +1,4 @@
-package no.nav.teamarbeidsforhold.githubapp.dto;
+package no.nav.teamarbeidsforhold.githubapp.naisapi.dto;
 
 import java.util.List;
 

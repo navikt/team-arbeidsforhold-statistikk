@@ -1,4 +1,4 @@
-package no.nav.teamarbeidsforhold.githubapp.dto;
+package no.nav.teamarbeidsforhold.githubapp.naisapi.dto;
 
 public record Manifest(String content) {
     private static Manifest of(final String type, final String jobname) {
