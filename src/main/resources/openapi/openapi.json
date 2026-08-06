@@ -224,7 +224,10 @@
           "id": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "id"
+        ]
       },
       "CriticalVulnerability": {
         "allOf": [
