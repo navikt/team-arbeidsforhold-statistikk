@@ -1,7 +1,10 @@
 package no.nav.teamarbeidsforhold.githubapp.components;
 
 import no.nav.teamarbeidsforhold.githubapp.naisapi.dto.*;
+import no.nav.teamarbeidsforhold.githubapp.naismanifest.NaisManifest;
+import no.nav.teamarbeidsforhold.githubapp.naismanifest.Spec;
 import no.nav.teamarbeidsforhold.githubapp.repository.DeploymentRepository;
+import no.nav.teamarbeidsforhold.githubapp.repository.VulnerabilityRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -32,6 +35,10 @@ class KopierNaisApiDataTest {
     DeploymentRepository deploymentRepository;
     @Autowired
     Clock klokke;
+    @MockitoBean
+    ManifestParser manifestParser;
+    @Autowired
+    private VulnerabilityRepository vulnerabilityRepository;
 
     @Test
     void kopierNaisApiDataTilDatabase() {
@@ -39,6 +46,7 @@ class KopierNaisApiDataTest {
         final GraphQlClient.RetrieveSpec mockRetrieveSpec = Mockito.mock(GraphQlClient.RetrieveSpec.class);
         when(graphql.document(any())).thenReturn(mockRequestSpec);
         when(mockRequestSpec.retrieve(any())).thenReturn(mockRetrieveSpec);
+        when(manifestParser.parse(any())).thenReturn(new NaisManifest("TestJob", new Spec(List.of())));
         final Deployment deployment = new Deployment(LocalDateTime.now(klokke),
                 "0123456789abcdef0123456789abcdef",
                 "dependabot",
@@ -46,9 +54,19 @@ class KopierNaisApiDataTest {
         final Vulnerability suppressed = new Vulnerability("CVE-1", new Suppression(ImageVulnerabilitySuppressionState.NOT_AFFECTED));
         final Vulnerability ikkeSuppressed = new Vulnerability("CVE-2", null);
         final Image image = new Image("some.app", "v1.0", List.of(suppressed, ikkeSuppressed));
-        final List<Workload> workloads = List.of(new Workload("foo-things", Manifest.job("foo-things"), List.of(deployment), TeamEnvironment.of("test-fss"), image));
+        final List<Workload> workloads = List.of(new Workload("foo-things", Manifest.job("foo-things"), List.of(deployment), TeamEnvironment.of("test-fss"), image, new MiljøSpesifisertNavn("foo-things", "")));
         when(mockRetrieveSpec.toEntity(ArgumentMatchers.eq(Team.class))).thenReturn(Mono.just(new Team(workloads)));
         kopierNaisApiData.kopierNaisApiDataTilDatabase();
-        assertEquals(List.of(new no.nav.teamarbeidsforhold.githubapp.entity.Deployment()), deploymentRepository.findAll());
+        final List<no.nav.teamarbeidsforhold.githubapp.entity.Deployment> faktiskeDeploymentLagret = deploymentRepository.findAll();
+        assertEquals(1, faktiskeDeploymentLagret.size());
+        final no.nav.teamarbeidsforhold.githubapp.entity.Deployment deploymentLagret = faktiskeDeploymentLagret.getFirst();
+        assertEquals("foo-things", deploymentLagret.getId().getWorkloadName());
+        assertEquals("", deploymentLagret.getId().getSuffix());
+        assertEquals("test-fss", deploymentLagret.getId().getEnvironment());
+        assertEquals("TestJob", deploymentLagret.getWorkloadName().getWorkloadType());
+        final List<no.nav.teamarbeidsforhold.githubapp.entity.Vulnerability> sårbarheterLagret = vulnerabilityRepository.findAll();
+        assertEquals(1, sårbarheterLagret.size());
+        final no.nav.teamarbeidsforhold.githubapp.entity.Vulnerability sårbarhetLagret = sårbarheterLagret.getFirst();
+        assertEquals("CVE-2", sårbarhetLagret.getId());
     }
 }
