@@ -43,3 +43,4 @@ spec:
       external:
         - host: api.github.com
         - host: nvd.nist.gov
+        - host: console.nav.cloud.nais.io
