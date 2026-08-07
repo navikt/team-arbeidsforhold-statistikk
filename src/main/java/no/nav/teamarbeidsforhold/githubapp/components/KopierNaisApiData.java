@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Component
@@ -39,9 +40,8 @@ public class KopierNaisApiData {
         this.deploymentVulnerabilityRepository = deploymentVulnerabilityRepository;
     }
 
-    @Async
-    public void kopierNaisApiDataTilDatabase() {
-        naisApi.document("workloads-med-critical-cve").retrieve("team").toEntity(Team.class).subscribe(this::lagre, throwable -> log.error("Feil i henting eller lagring av data fra nais console", throwable));
+    public CompletableFuture<Void> kopierNaisApiDataTilDatabase() {
+        return naisApi.document("workloads-med-critical-cve").retrieve("team").toEntity(Team.class).doOnNext(this::lagre).then().toFuture();
     }
 
     private void lagre(final Team team) {
