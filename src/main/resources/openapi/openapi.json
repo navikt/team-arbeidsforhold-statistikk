@@ -141,6 +141,18 @@
         }
       }
     },
+    "/api/admin/naisjobb": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "202": {
+            "description": "Jobb startet"
+          }
+        }
+      }
+    },
     "/api/admin/liquibase/unlock": {
       "post": {
         "tags": [

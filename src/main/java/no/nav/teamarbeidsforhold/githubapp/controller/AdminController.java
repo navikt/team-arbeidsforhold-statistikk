@@ -5,6 +5,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.lockservice.LockServiceFactory;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.teamarbeidsforhold.githubapp.components.KopierNaisApiData;
 import no.nav.teamarbeidsforhold.githubapp.components.KopierNvdCveData;
 import no.nav.teamarbeidsforhold.githubapp.generert.api.AdminApi;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +24,12 @@ import java.sql.SQLException;
 public class AdminController implements AdminApi {
     private final KopierNvdCveData kopierNvdCveData;
     private final DataSource dataSource;
+    private final KopierNaisApiData kopierNaisApiData;
 
-    public AdminController(final KopierNvdCveData kopierNvdCveData, final DataSource dataSource) {
+    public AdminController(final KopierNvdCveData kopierNvdCveData, final DataSource dataSource, final KopierNaisApiData kopierNaisApiData) {
         this.kopierNvdCveData = kopierNvdCveData;
         this.dataSource = dataSource;
+        this.kopierNaisApiData = kopierNaisApiData;
     }
 
     @Override
@@ -44,6 +47,18 @@ public class AdminController implements AdminApi {
             return ResponseEntity.internalServerError().build();
         }
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> apiAdminNaisjobbPost() {
+        kopierNaisApiData.kopierNaisApiDataTilDatabase().whenComplete((_, feil) -> {
+            if (feil != null) {
+                log.error("Feil i Nais API oppdatering som ble startet manuelt", feil);
+            } else {
+                log.info("Data fra Nais API oppdatert");
+            }
+        });
+        return ResponseEntity.accepted().build();
     }
 
     @Override
