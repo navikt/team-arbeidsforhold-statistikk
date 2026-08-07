@@ -69,7 +69,7 @@ public class KopierNvdCveData {
     public CompletableFuture<Boolean> kopierNvdCveDataTilDatabase() throws IOException {
         if (!indikererMetadataNyeDataOgHvisSåLagreMetadata()) {
             log.info("Data fra NVD har ikke endret seg, gjør ingen oppdatering");
-            return CompletableFuture.completedFuture(true);
+            return CompletableFuture.completedFuture(false);
         }
 
         final byte[] bytes = webClient.get()
