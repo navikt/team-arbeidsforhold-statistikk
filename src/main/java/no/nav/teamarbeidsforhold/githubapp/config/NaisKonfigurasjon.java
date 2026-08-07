@@ -3,6 +3,7 @@ package no.nav.teamarbeidsforhold.githubapp.config;
 import no.nav.teamarbeidsforhold.githubapp.qualifier.NaisApi;
 import no.nav.teamarbeidsforhold.githubapp.qualifier.TrivyApi;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -22,6 +23,7 @@ import java.util.function.Supplier;
 @Configuration
 public class NaisKonfigurasjon {
     @Bean
+    @ConditionalOnMissingBean(name = "naisToken")
     @NaisApi
     public Supplier<String> naisToken(@Value("${NAIS_SERVICE_ACCOUNT_TOKEN_PATH:?NAIS_SERVICE_ACCOUNT_TOKEN_PATH manglet}") final String naisApiTokenSti) {
         final Path sti = Path.of(naisApiTokenSti);
