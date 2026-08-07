@@ -41,7 +41,7 @@ class KopierNaisApiDataTest {
     private VulnerabilityRepository vulnerabilityRepository;
 
     @Test
-    void kopierNaisApiDataTilDatabase() {
+    void testKopieringTilDatabase() {
         final GraphQlClient.RequestSpec mockRequestSpec = Mockito.mock(GraphQlClient.RequestSpec.class);
         final GraphQlClient.RetrieveSpec mockRetrieveSpec = Mockito.mock(GraphQlClient.RetrieveSpec.class);
         when(graphql.document(any())).thenReturn(mockRequestSpec);
@@ -53,9 +53,9 @@ class KopierNaisApiDataTest {
                 "navikt/reposomikkeeksisterer");
         final Vulnerability suppressed = new Vulnerability("CVE-1", new Suppression(ImageVulnerabilitySuppressionState.NOT_AFFECTED));
         final Vulnerability ikkeSuppressed = new Vulnerability("CVE-2", null);
-        final Image image = new Image("some.app", "v1.0", List.of(suppressed, ikkeSuppressed));
-        final List<Workload> workloads = List.of(new Workload("foo-things", Manifest.job("foo-things"), List.of(deployment), TeamEnvironment.of("test-fss"), image, new MiljøSpesifisertNavn("foo-things", "")));
-        when(mockRetrieveSpec.toEntity(ArgumentMatchers.eq(Team.class))).thenReturn(Mono.just(new Team(workloads)));
+        final Image image = new Image("some.app", "v1.0", new PaginatedVulnerabilities(List.of(suppressed, ikkeSuppressed)));
+        final List<Workload> workloads = List.of(new Workload("foo-things", Manifest.job("foo-things"), new PaginatedDeployments(List.of(deployment)), TeamEnvironment.of("test-fss"), image, new MiljøSpesifisertNavn("foo-things", "")));
+        when(mockRetrieveSpec.toEntity(ArgumentMatchers.eq(Team.class))).thenReturn(Mono.just(new Team(new PaginatedWorkloads(workloads))));
         kopierNaisApiData.kopierNaisApiDataTilDatabase();
         final List<no.nav.teamarbeidsforhold.githubapp.entity.Deployment> faktiskeDeploymentLagret = deploymentRepository.findAll();
         assertEquals(1, faktiskeDeploymentLagret.size());

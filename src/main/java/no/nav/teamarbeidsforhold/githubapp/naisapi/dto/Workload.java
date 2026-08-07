@@ -1,11 +1,10 @@
 package no.nav.teamarbeidsforhold.githubapp.naisapi.dto;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public record Workload(String name, Manifest manifest, List<Deployment> deployments, TeamEnvironment teamEnvironment, Image image, MiljøSpesifisertNavn miljøSpesifisertNavn) {
+public record Workload(String name, Manifest manifest, PaginatedDeployments deployments, TeamEnvironment teamEnvironment, Image image, MiljøSpesifisertNavn miljøSpesifisertNavn) {
     private static final Pattern MILJØ_SPESIFISERT_NAVN = Pattern.compile("([a-zA-Z\\-0-9]+-)(q\\d)(-[a-zA-Z\\-0-9])?");
 
     public Workload {

@@ -2,7 +2,6 @@ package no.nav.teamarbeidsforhold.githubapp.components;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.teamarbeidsforhold.githubapp.entity.*;
-import no.nav.teamarbeidsforhold.githubapp.naisapi.dto.ImageVulnerabilitySuppressionState;
 import no.nav.teamarbeidsforhold.githubapp.naisapi.dto.MiljøSpesifisertNavn;
 import no.nav.teamarbeidsforhold.githubapp.naisapi.dto.Team;
 import no.nav.teamarbeidsforhold.githubapp.naismanifest.NaisManifest;
@@ -11,12 +10,12 @@ import no.nav.teamarbeidsforhold.githubapp.repository.DeploymentVulnerabilityRep
 import no.nav.teamarbeidsforhold.githubapp.repository.VulnerabilityRepository;
 import no.nav.teamarbeidsforhold.githubapp.repository.WorkloadRepository;
 import org.springframework.graphql.client.HttpGraphQlClient;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -41,7 +40,7 @@ public class KopierNaisApiData {
     }
 
     public CompletableFuture<Void> kopierNaisApiDataTilDatabase() {
-        return naisApi.document("workloads-med-critical-cve").retrieve("team").toEntity(Team.class).doOnNext(this::lagre).then().toFuture();
+        return naisApi.documentName("workloads-med-critical-cve").retrieve("team").toEntity(Team.class).doOnNext(this::lagre).then().toFuture();
     }
 
     private void lagre(final Team team) {
@@ -49,7 +48,7 @@ public class KopierNaisApiData {
         final List<Deployment> nyeDeployments = new ArrayList<>();
         final List<DeploymentVulnerability> nyeSårbarheterFunnet = new ArrayList<>();
         final List<Vulnerability> nyeSårbarheter = new ArrayList<>();
-        team.workloads().stream().flatMap(workload -> workload.image().vulnerabilities().stream()
+        team.workloads().nodes().stream().flatMap(workload -> workload.image().vulnerabilities().nodes().stream()
                         .filter(sårbarhet -> sårbarhet.suppression() == null)
                         .map(sårbarhet -> sårbarhet.identifier()))
                 .distinct()
@@ -58,7 +57,7 @@ public class KopierNaisApiData {
                     vulnerability.setId(sårbarhet);
                     nyeSårbarheter.add(vulnerability);
                 });
-        team.workloads().forEach(workload -> {
+        team.workloads().nodes().forEach(workload -> {
             final Workload nyWorkload = new Workload();
             final String manifestInnhold = workload.manifest().content();
             final NaisManifest manifest = manifestParser.parse(manifestInnhold);
@@ -68,7 +67,7 @@ public class KopierNaisApiData {
             nyWorkload.setImage(workload.image().navnMedTag());
             nyeWorkloads.add(nyWorkload);
             final String cluster = workload.teamEnvironment().environment().name();
-            workload.deployments().forEach(deployment -> {
+            workload.deployments().nodes().forEach(deployment -> {
                 final Deployment nyDeployment = new Deployment();
                 final DeploymentId id = new DeploymentId();
                 id.setWorkloadName(miljøSpesifisertNavn.navn());
@@ -83,7 +82,7 @@ public class KopierNaisApiData {
                 nyDeployment.setLastCommit(deployment.repository() + "@" + deployment.commitSha());
                 nyDeployment.setLastDeployTime(deployment.createdAt().atZone(klokke.getZone()).toInstant());
                 nyeDeployments.add(nyDeployment);
-                workload.image().vulnerabilities().stream().filter(sårbarhet -> sårbarhet.suppression() == null).forEach(sårbarhet -> {
+                workload.image().vulnerabilities().nodes().stream().filter(sårbarhet -> sårbarhet.suppression() == null).forEach(sårbarhet -> {
                     final DeploymentVulnerability sårbarhetViHar = new DeploymentVulnerability();
                     final DeploymentVulnerabilityId sårbarhetsId = new DeploymentVulnerabilityId();
                     sårbarhetsId.setVulnerabilityId(sårbarhet.identifier());
