@@ -71,7 +71,7 @@ public class KopierNaisApiData {
                 final Deployment nyDeployment = new Deployment();
                 final DeploymentId id = new DeploymentId();
                 id.setWorkloadName(miljøSpesifisertNavn.navn());
-                id.setSuffix(miljøSpesifisertNavn.miljø());
+                id.setSuffix(miljøSpesifisertNavn.miljø() == null ? "" : miljøSpesifisertNavn.miljø());
                 id.setEnvironment(cluster);
                 nyDeployment.setId(id);
                 nyDeployment.setLastSeen(Instant.now(klokke));
