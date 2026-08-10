@@ -45,6 +45,7 @@ class KopierNaisApiDataTest {
         final GraphQlClient.RequestSpec mockRequestSpec = Mockito.mock(GraphQlClient.RequestSpec.class);
         final GraphQlClient.RetrieveSpec mockRetrieveSpec = Mockito.mock(GraphQlClient.RetrieveSpec.class);
         when(graphql.document(any())).thenReturn(mockRequestSpec);
+        when(graphql.documentName(any())).thenReturn(mockRequestSpec);
         when(mockRequestSpec.retrieve(any())).thenReturn(mockRetrieveSpec);
         when(manifestParser.parse(any())).thenReturn(new NaisManifest("TestJob", new Spec(List.of())));
         final Deployment deployment = new Deployment(LocalDateTime.now(klokke),
