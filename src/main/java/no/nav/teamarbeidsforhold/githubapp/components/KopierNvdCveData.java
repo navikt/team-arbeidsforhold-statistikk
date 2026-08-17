@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.teamarbeidsforhold.githubapp.config.NvdKonfigurasjon;
 import no.nav.teamarbeidsforhold.githubapp.entity.CveNvd;
 import no.nav.teamarbeidsforhold.githubapp.entity.CveNvdMeta;
+import no.nav.teamarbeidsforhold.githubapp.entity.Vulnerability;
 import no.nav.teamarbeidsforhold.githubapp.qualifier.NvdApi;
 import no.nav.teamarbeidsforhold.githubapp.repository.CveNvdMetaRepository;
 import no.nav.teamarbeidsforhold.githubapp.service.VulnerabilityService;
@@ -79,12 +80,15 @@ public class KopierNvdCveData {
                 .block();
         try (GZIPInputStream gzip = new GZIPInputStream(new ByteArrayInputStream(Objects.requireNonNull(bytes)))) {
             final JsonNode root = new ObjectMapper().readTree(gzip);
-            final Map<String, CveNvd> cveNvds = new HashMap<>();
+            final List<CveNvd> cveNvds = new ArrayList<>();
             for (JsonNode v : root.path("vulnerabilities")) {
                 final JsonNode cve = v.path("cve");
                 final CveNvd cveNvd = new CveNvd();
                 final String id = cve.required("id").asString();
+                final Vulnerability sårbarhet = new Vulnerability();
+                sårbarhet.setId(id);
                 cveNvd.setCveId(id);
+                cveNvd.setVulnerability(sårbarhet);
                 cveNvd.setPublished(sjekkDatoType(cve.required("published").stringValue()));
                 cveNvd.setLastModified(sjekkDatoType(cve.required("lastModified").stringValue()));
                 final JsonNode cvsser = cve.path("metrics").path("cvssMetricV40");
@@ -125,7 +129,7 @@ public class KopierNvdCveData {
                     cveNvd.setModifiedVi(cvss.path("modifiedVulnerableIntegrityImpact").asString());
                     cveNvd.setModifiedVa(cvss.path("modifiedVulnerableAvailabilityImpact").asString());
                 }
-                cveNvds.put(id, cveNvd);
+                cveNvds.add(cveNvd);
             }
             vulnerabilityService.lagreNvdData(cveNvds);
         }
