@@ -93,7 +93,7 @@ public class KopierNvdCveData {
                 cveNvd.setLastModified(sjekkDatoType(cve.required("lastModified").stringValue()));
                 final JsonNode cvsser = cve.path("metrics").path("cvssMetricV40");
                 final JsonNode cvss = cvsser.path(0);
-                if (cvsser.size() > 2) {
+                if (cvsser.size() >= 2) {
                     log.error("Kan ikke håndtere to forskjellige cvss-verdier, vi må skrive kode for å velge/prioritere");
                 } else if (cvss.isMissingNode()) {
                     log.warn("Server ga oss ikke cvss for {}", cveNvd.getCveId());
