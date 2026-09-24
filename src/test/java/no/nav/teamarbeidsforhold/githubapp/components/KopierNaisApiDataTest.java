@@ -15,12 +15,15 @@ import org.springframework.graphql.client.GraphQlClient;
 import org.springframework.graphql.client.HttpGraphQlClient;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.core.publisher.Mono;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLFactory;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -69,5 +72,90 @@ class KopierNaisApiDataTest {
         assertEquals(1, sårbarheterLagret.size());
         final no.nav.teamarbeidsforhold.githubapp.entity.Vulnerability sårbarhetLagret = sårbarheterLagret.getFirst();
         assertEquals("CVE-2", sårbarhetLagret.getId());
+    }
+
+    @Test
+    void testSkalParseScheduleFraManifest() throws Exception {
+        final ManifestParser parser = new ManifestParser(new ObjectMapper(new YAMLFactory()));
+        final NaisManifest manifest = parser.parse("""
+                apiVersion: nais.io/v1alpha1
+                kind: Application
+                spec:
+                  schedule:
+                    - cron: "0 6 * * *"
+                """);
+
+        assertEquals("Application", manifest.kind());
+        assertTrue(manifest.hasScheduledDeploy());
+        assertEquals("0 6 * * *", manifest.spec().scheduleExpression());
+    }
+
+    @Test
+    void testSkalParseScheduleFraOnBlokk() throws Exception {
+        final ManifestParser parser = new ManifestParser(new ObjectMapper(new YAMLFactory()));
+        final NaisManifest manifest = parser.parse("""
+                apiVersion: nais.io/v1alpha1
+                kind: Naisjob
+                spec:
+                  on:
+                    schedule:
+                      - cron: "0 7 * * *"
+                """);
+
+        assertEquals("Naisjob", manifest.kind());
+        assertTrue(manifest.hasScheduledDeploy());
+        assertEquals("0 7 * * *", manifest.spec().scheduleExpression());
+    }
+
+    @Test
+    void testSkalParseScheduleFraGithubActionsOnBlokk() throws Exception {
+        final ManifestParser parser = new ManifestParser(new ObjectMapper(new YAMLFactory()));
+        final String yaml = """
+                on:
+                  workflow_dispatch:
+                    inputs:
+                      environment:
+                        description: "Hvilket miljø skal appen deployes til?"
+                        required: true
+                        type: choice
+                        options:
+                          - dev
+                          - q1
+                          - q4
+                          - q5
+                          - all
+                  schedule:
+                    - cron: "0 1 * * 1"
+                  push:
+                    branches:
+                      - main
+                """;
+
+        assertTrue(parser.hasScheduledDeploy(yaml));
+    }
+
+    @Test
+    void testSkalGiFalseNarDetManglerSchedule() throws Exception {
+        final ManifestParser parser = new ManifestParser(new ObjectMapper(new YAMLFactory()));
+        final String yaml = """
+                on:
+                  workflow_dispatch:
+                    inputs:
+                      environment:
+                        description: "Hvilket miljø skal appen deployes til?"
+                        required: true
+                        type: choice
+                        options:
+                          - dev
+                          - q1
+                          - q4
+                          - q5
+                          - all
+                  push:
+                    branches:
+                      - main
+                """;
+
+        assertTrue(!parser.hasScheduledDeploy(yaml));
     }
 }
