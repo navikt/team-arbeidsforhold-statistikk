@@ -11,3 +11,5 @@ databaseChangeLog:
       file: db/changelog/005-ny-deployment-lagring.yaml
   - include:
       file: db/changelog/006-kritiske-sårbarheter-per-deployment.yaml
+  - include:
+      file: db/changelog/007-støtte-for-slack-meldinger.yaml
