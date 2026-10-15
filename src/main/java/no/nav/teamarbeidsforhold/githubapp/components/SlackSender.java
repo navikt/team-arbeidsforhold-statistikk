@@ -1,22 +1,14 @@
 package no.nav.teamarbeidsforhold.githubapp.components;
 
-import org.springframework.scheduling.annotation.Scheduled;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.concurrent.TimeUnit;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public final class SlackSender {
-    private final LederUtpeker lederUtpeker;
+@RequiredArgsConstructor
+public class SlackSender {
+    @Transactional
+    public void sendMeldinger() {
 
-    public SlackSender(final LederUtpeker lederUtpeker) {
-        this.lederUtpeker = lederUtpeker;
-    }
-
-    @Scheduled(timeUnit = TimeUnit.MINUTES,fixedRate = 30)
-    public void sjekkOgSendMelding() {
-        if(lederUtpeker.erLeder()){
-            skjekk
-        }
     }
 }
