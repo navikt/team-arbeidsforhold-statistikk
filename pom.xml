@@ -142,6 +142,11 @@
             <artifactId>shedlock-spring</artifactId>
             <version>7.10.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.slack.api</groupId>
+            <artifactId>slack-api-client</artifactId>
+            <version>1.52.0</version>
+        </dependency>
 
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
