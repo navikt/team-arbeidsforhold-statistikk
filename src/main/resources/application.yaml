@@ -2,7 +2,7 @@ spring:
   application:
     name: team-arbeidsforhold-statistikk
   datasource:
-    url: jdbc:postgresql://${READWRITE_PGHOST}:${READWRITE_PGPORT}/${READWRITE_PGDATABASE}
+    url: jdbc:postgresql://${READWRITE_PGHOST}:${READWRITE_PGPORT}/${READWRITE_PGDATABASE}?sslmode=verify-full&sslcert=${READWRITE_PGSSLCERT}&sslkey=${READWRITE_PGSSLKEY}&sslrootcert=${READWRITE_PGSSLROOTCERT}
     username: ${READWRITE_PGUSER}
     hikari:
       data-source-properties:
@@ -15,7 +15,7 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:db/changelog-master.yaml
-    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
+    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}?sslmode=verify-full&sslcert=${PGSSLCERT}&sslkey=${PGSSLKEY}&sslrootcert=${PGSSLROOTCERT}
     user: ${PGUSER}
   security:
     oauth2:
