@@ -10,7 +10,7 @@ spec:
       cpu: 100m
       diskSize: 2Gi
       memory: 2G
-    allowDeletion: false
+    allowDeletion: true
     audit:
       enabled: false
     highAvailability: false
