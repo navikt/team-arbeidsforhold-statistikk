@@ -17,8 +17,9 @@ spec:
     requests:
       cpu: 50m
       memory: 32Mi
-  postgres:
-    clusterName: arbeidsforhold-github-app
+  uses:
+    postgres:
+      - name: team-arbeidsforhold-statistikk-db
   envFrom:
     - secret: github-app
   azure:

@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: 002
-      author: W175869
+      author: arbeidsforhold
       changes:
         - createTable:
               tableName: pom
