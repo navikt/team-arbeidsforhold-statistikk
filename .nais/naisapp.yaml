@@ -7,8 +7,6 @@ metadata:
     team: arbeidsforhold
 spec:
   leaderElection: true
-  ingresses:
-    - {{ ingress }}
   port: 8080
   replicas:
     max: 2
@@ -25,11 +23,7 @@ spec:
   azure:
     application:
       enabled: true
-      tenant: {{ azure_tenant }}
       allowAllUsers: false
-      claims:
-        groups:
-          - id: {{ access_group }}
     sidecar:
       enabled: true
       autoLogin: true
@@ -39,8 +33,6 @@ spec:
         - application: azure-token-generator
           namespace: nais
     outbound:
-      rules:
-        - application: team-arbeidsforhold-statistikk-trivy
       external:
         - host: api.github.com
         - host: nvd.nist.gov
