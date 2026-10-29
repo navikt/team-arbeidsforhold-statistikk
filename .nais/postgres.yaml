@@ -3,11 +3,6 @@ type: Postgres
 name: team-arbeidsforhold-statistikk-db
 spec:
   activeBranch: main
-  extensions:
-    - name: pg_trgm
-    - name: pgcrypto
-    - name: vector
-    - name: citext
   highAvailability: false
   majorVersion: "18"
   resources:
