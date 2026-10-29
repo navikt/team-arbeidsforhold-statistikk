@@ -1,0 +1,16 @@
+version: v1
+type: Postgres
+name: team-arbeidsforhold-statistikk-db
+spec:
+  activeBranch: main
+  extensions:
+    - name: pg_trgm
+    - name: pgcrypto
+    - name: vector
+    - name: citext
+  highAvailability: false
+  majorVersion: "18"
+  resources:
+    cpu: 100m
+    diskSize: 10Gi
+    memory: 512Mi
