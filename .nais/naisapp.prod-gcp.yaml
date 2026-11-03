@@ -1,0 +1,9 @@
+spec:
+  azure:
+    application:
+      tenant: "nav.no"
+      claims:
+        groups:
+          - id: "4db43d69-1b2e-4abb-adba-0b2add289fe6"
+  ingresses:
+    - "https://team-arbeidsforhold-statistikk.ansatt.nav.no"

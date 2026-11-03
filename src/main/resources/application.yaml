@@ -2,7 +2,7 @@ spring:
   application:
     name: team-arbeidsforhold-statistikk
   datasource:
-    url: ${PGJDBCURL}
+    url: ${READWRITE_PGJDBCURL}
     hikari:
       data-source-properties:
         prepareThreshold: 0
@@ -14,6 +14,7 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:db/changelog-master.yaml
+    url: ${PGJDBCURL}
   security:
     oauth2:
       resourceserver:
