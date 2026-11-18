@@ -7,6 +7,7 @@ import no.nav.teamarbeidsforhold.githubapp.githuboppdateringer.FinnRepoer;
 import no.nav.teamarbeidsforhold.githubapp.components.Lagring;
 import no.nav.teamarbeidsforhold.githubapp.components.GithubOppdateringsKø;
 import org.springframework.http.ResponseEntity;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.List;
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
+@Profile("!local")
 public class RepoController implements RepoApi {
     private final GithubOppdateringsKø githubOppdateringsKø;
     private final Lagring lagring;

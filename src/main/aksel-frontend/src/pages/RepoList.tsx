@@ -35,12 +35,12 @@ export default function RepoList() {
             }));
 
             try {
-                const response = await api.apiRepoRepoNameGet(repoName);
+                const response = await api.apiRepoRepoNameGet(repoName.substring(repoName.lastIndexOf("/") + 1));
                 setRepoDetails(old => ({
                     ...old,
                     [repoName]: {loading: false, data: response.data}
                 }));
-            } catch (e) {
+            } catch {
                 setRepoDetails(old => ({
                     ...old,
                     [repoName]: {
@@ -105,7 +105,7 @@ export default function RepoList() {
                                     : (
                                         <>
                                             <BodyShort>
-                                                Miljøer: {expandedRepo.data?.environments}
+                                                Miljøer: {expandedRepo.data?.environments.join(", ") || "Ingen miljøer funnet"}
                                             </BodyShort>
                                         </>
                                     )}

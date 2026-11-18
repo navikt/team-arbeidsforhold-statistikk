@@ -10,10 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
-import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Pattern;
 
 @Component
 @Transactional
@@ -32,17 +29,6 @@ public class Lagring {
 
     public List<Deployment> alleDeployments() {
         return deploymentRepository.findAll();
-    }
-
-    private Deployment workload(final String[] felt) {
-        final DeploymentId id = new DeploymentId();
-        id.setWorkloadName(felt[0].trim());
-        id.setEnvironment(felt[1].trim());
-        id.setSuffix(felt[2].trim());
-        final Deployment deployment = new Deployment();
-        deployment.setId(id);
-        deployment.setLastSeen(Instant.now());
-        return deployment;
     }
 
     public RepoDetails repoMedNavn(final String repoName) {

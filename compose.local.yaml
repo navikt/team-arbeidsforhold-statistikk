@@ -1,0 +1,19 @@
+services:
+  database:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: statistikk
+      POSTGRES_USER: ${LOCAL_DB_USERNAME:-local}
+      POSTGRES_PASSWORD: ${LOCAL_DB_PASSWORD:-local}
+    ports:
+      - "127.0.0.1:${LOCAL_DB_PORT:-5432}:5432"
+    volumes:
+      - lokal-database:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  lokal-database:
