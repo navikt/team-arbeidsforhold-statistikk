@@ -10,6 +10,7 @@ import no.nav.teamarbeidsforhold.githubapp.repository.DeploymentVulnerabilityRep
 import no.nav.teamarbeidsforhold.githubapp.repository.VulnerabilityRepository;
 import no.nav.teamarbeidsforhold.githubapp.repository.WorkloadRepository;
 import org.springframework.graphql.client.HttpGraphQlClient;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
@@ -20,6 +21,7 @@ import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Component
+@Profile("!local")
 public class KopierNaisApiData {
     private final HttpGraphQlClient naisApi;
     private final DeploymentRepository deploymentRepository;

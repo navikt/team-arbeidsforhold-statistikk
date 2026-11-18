@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.teamarbeidsforhold.githubapp.worker.GithubOppdatering;
 import org.kohsuke.github.GitHub;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -14,6 +15,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 @Slf4j
 @Component
+@Profile("!local")
 public class GithubOppdateringsKø {
     private final BlockingQueue<GithubOppdatering> queue = new LinkedBlockingQueue<>(100);
     private final Executor executor;

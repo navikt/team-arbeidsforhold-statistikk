@@ -9,6 +9,7 @@ import no.nav.teamarbeidsforhold.githubapp.components.KopierNaisApiData;
 import no.nav.teamarbeidsforhold.githubapp.components.KopierNvdCveData;
 import no.nav.teamarbeidsforhold.githubapp.generert.api.AdminApi;
 import org.springframework.http.ResponseEntity;
+import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +22,7 @@ import java.sql.SQLException;
 
 @RestController
 @Slf4j
+@Profile("!local")
 public class AdminController implements AdminApi {
     private final KopierNvdCveData kopierNvdCveData;
     private final DataSource dataSource;

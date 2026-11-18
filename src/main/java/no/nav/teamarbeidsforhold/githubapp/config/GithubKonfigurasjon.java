@@ -11,12 +11,14 @@ import org.kohsuke.github.extras.authorization.JWTTokenProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.util.function.Supplier;
 
 @Configuration
+@Profile("!local")
 public class GithubKonfigurasjon {
     public static final String ORG_NAVN = "navikt";
 

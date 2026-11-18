@@ -4,11 +4,13 @@ import no.nav.teamarbeidsforhold.githubapp.worker.StoppSpringBootHvisTrådFeiler
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 @Configuration
+@Profile("!local")
 public class GithubKøKonfigurasjon {
     @Bean
     @Qualifier("github")
