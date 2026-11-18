@@ -24,6 +24,7 @@ public class Lagring {
     }
 
     public List<Repo> alleRepoer() {
+        /*
         final String repoer = """
                 aareg
                 aareg-ajourholdsfiler
@@ -77,8 +78,8 @@ public class Lagring {
                 team-arbeidsforhold-utvikling
                 vault-iac
                 """;
-        return Arrays.stream(repoer.split("\\s+")).map(navn -> new Repo(navn, URI.create("https://github.com/" + navn), 0, 0)).toList();
-        //return repoRepository.listAll().stream().map(repoEntitet -> new Repo(repoEntitet.getFullName(), repoEntitet.getCloneUrl(), 0)).toList();
+        return Arrays.stream(repoer.split("\\s+")).map(navn -> new Repo(navn, URI.create("https://github.com/" + navn), 0, 0)).toList();*/
+        return repoRepository.findAll().stream().map(repoEntitet -> new Repo(repoEntitet.getFullName(), URI.create(repoEntitet.getCloneUrl()), 0, 0)).toList();
     }
 
     public List<Deployment> alleDeployments() {
