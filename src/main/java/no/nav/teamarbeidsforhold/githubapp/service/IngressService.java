@@ -108,7 +108,7 @@ public class IngressService {
         if (domene(host, "prod-fss-pub.nais.io") || domene(host, "dev-fss-pub.nais.io")) {
             return IngressGroup.ExposureEnum.GCP;
         }
-        if (domene(host, "nav.no")) {
+        if (domene(host, "nav.no") || domene(host, "adeo.no") || domene(host, "devillo.no")) {
             return IngressGroup.ExposureEnum.INTERNET;
         }
         return IngressGroup.ExposureEnum.UNKNOWN;
