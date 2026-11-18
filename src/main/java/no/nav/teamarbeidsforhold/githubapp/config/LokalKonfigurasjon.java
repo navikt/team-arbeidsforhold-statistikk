@@ -39,6 +39,10 @@ public class LokalKonfigurasjon {
         if (!Arrays.equals(miljo.getActiveProfiles(), new String[]{"local"})) {
             throw new IllegalStateException("The local profile must be activated explicitly and alone");
         }
+        if (!Set.of("127.0.0.1", "localhost", "::1", "[::1]")
+                .contains(miljo.getProperty("server.address", ""))) {
+            throw new IllegalStateException("The local profile must bind HTTP to a loopback address");
+        }
         if (Binder.get(miljo).bind("spring.profiles.include", Bindable.listOf(String.class))
                 .orElse(List.of()).contains("local")) {
             throw new IllegalStateException("The local profile cannot be activated through spring.profiles.include");
