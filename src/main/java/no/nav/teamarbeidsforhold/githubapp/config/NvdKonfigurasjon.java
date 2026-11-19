@@ -3,11 +3,13 @@ package no.nav.teamarbeidsforhold.githubapp.config;
 import no.nav.teamarbeidsforhold.githubapp.qualifier.NvdApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
 @Configuration
+@Profile("!local")
 public class NvdKonfigurasjon {
     public static final String NVD_ADRESSE = "https://nvd.nist.gov/feeds/json/cve/2.0/";
     public static final String FILNAVN = "nvdcve-2.0-recent";

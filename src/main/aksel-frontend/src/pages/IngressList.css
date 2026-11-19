@@ -1,0 +1,12 @@
+.ingress-list {
+    text-align: left;
+    min-width: 0;
+}
+
+.ingress-list__table {
+    overflow-x: auto;
+}
+
+.ingress-list__table td {
+    overflow-wrap: anywhere;
+}

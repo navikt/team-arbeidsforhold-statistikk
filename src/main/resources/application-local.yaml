@@ -1,0 +1,17 @@
+server:
+  address: 127.0.0.1
+  port: 8080
+
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerAutoConfiguration
+      - org.springframework.boot.security.oauth2.server.resource.autoconfigure.reactive.ReactiveOAuth2ResourceServerAutoConfiguration
+  datasource:
+    url: ${LOCAL_DB_URL:jdbc:postgresql://127.0.0.1:${LOCAL_DB_PORT:5432}/statistikk}
+    username: ${LOCAL_DB_USERNAME:local}
+    password: ${LOCAL_DB_PASSWORD:local}
+  liquibase:
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}

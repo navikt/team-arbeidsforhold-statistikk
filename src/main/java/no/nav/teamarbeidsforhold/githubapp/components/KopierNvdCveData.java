@@ -9,6 +9,7 @@ import no.nav.teamarbeidsforhold.githubapp.qualifier.NvdApi;
 import no.nav.teamarbeidsforhold.githubapp.repository.CveNvdMetaRepository;
 import no.nav.teamarbeidsforhold.githubapp.service.VulnerabilityService;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import tools.jackson.databind.JsonNode;
@@ -31,6 +32,7 @@ import java.util.zip.GZIPInputStream;
 
 @Slf4j
 @Component
+@Profile("!local")
 public class KopierNvdCveData {
     public static final DateTimeFormatter FORMATTER =
             new DateTimeFormatterBuilder()

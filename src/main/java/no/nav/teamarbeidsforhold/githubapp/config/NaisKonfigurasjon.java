@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.graphql.client.HttpGraphQlClient;
@@ -21,6 +22,7 @@ import java.nio.file.Path;
 import java.util.function.Supplier;
 
 @Configuration
+@Profile("!local")
 public class NaisKonfigurasjon {
     @Bean
     @ConditionalOnMissingBean(name = "naisToken")

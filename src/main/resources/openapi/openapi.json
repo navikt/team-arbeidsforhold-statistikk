@@ -25,6 +25,25 @@
     }
   ],
   "paths": {
+    "/api/ingress": {
+      "get": {
+        "tags": [
+          "ingress"
+        ],
+        "responses": {
+          "200": {
+            "description": "Lagrede ingresser gruppert etter antatt nettverkstilgang, med de mest åpne først",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IngressOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/repo": {
       "get": {
         "tags": [
@@ -168,6 +187,73 @@
   },
   "components": {
     "schemas": {
+      "IngressOverview": {
+        "type": "object",
+        "properties": {
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IngressGroup"
+            }
+          },
+          "deploymentsWithoutManifest": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": ["groups", "deploymentsWithoutManifest"]
+      },
+      "IngressGroup": {
+        "type": "object",
+        "properties": {
+          "exposure": {
+            "type": "string",
+            "enum": ["INTERNET", "UNKNOWN", "EMPLOYEES", "INTERNAL", "GCP"]
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "ingresses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Ingress"
+            }
+          }
+        },
+        "required": ["exposure", "name", "description", "ingresses"]
+      },
+      "Ingress": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Ingress slik den står i manifestet. Kan være ugyldig og skal da fortsatt vises for manuell vurdering."
+          },
+          "repository": {
+            "type": ["string", "null"],
+            "pattern": "^[A-Za-z0-9-]+/[A-Za-z0-9_.-]+$",
+            "description": "GitHub-repo fra deploymentets siste commit, på formen owner/repo. Null hvis ukjent."
+          },
+          "workload": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "suffix": {
+            "type": "string",
+            "description": "Lagret miljøsuffix, for eksempel q1. Tom streng hvis ikke brukt."
+          },
+          "lastSeen": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          }
+        },
+        "required": ["url", "workload", "environment", "suffix"]
+      },
       "Repo": {
         "type": "object",
         "properties": {
