@@ -28,41 +28,41 @@ import java.util.Set;
 @Profile("local")
 public class LokalKonfigurasjon {
     @Bean
-    static BeanFactoryPostProcessor kontrollerLokaltMiljo(final ConfigurableEnvironment miljo) {
+    static BeanFactoryPostProcessor kontrollerLokaltMiljø(final ConfigurableEnvironment miljø) {
         return _ -> {
-            validerLokaltMiljo(miljo);
+            validerLokaltMiljø(miljø);
             log.info("Local profile active: anonymous loopback access, external imports and GitHub updates disabled");
         };
     }
 
-    static void validerLokaltMiljo(final ConfigurableEnvironment miljo) {
-        if (!Arrays.equals(miljo.getActiveProfiles(), new String[]{"local"})) {
+    static void validerLokaltMiljø(final ConfigurableEnvironment miljø) {
+        if (!Arrays.equals(miljø.getActiveProfiles(), new String[]{"local"})) {
             throw new IllegalStateException("The local profile must be activated explicitly and alone");
         }
         if (!Set.of("127.0.0.1", "localhost", "::1", "[::1]")
-                .contains(miljo.getProperty("server.address", ""))) {
+                .contains(miljø.getProperty("server.address", ""))) {
             throw new IllegalStateException("The local profile must bind HTTP to a loopback address");
         }
-        if (Binder.get(miljo).bind("spring.profiles.include", Bindable.listOf(String.class))
+        if (Binder.get(miljø).bind("spring.profiles.include", Bindable.listOf(String.class))
                 .orElse(List.of()).contains("local")) {
             throw new IllegalStateException("The local profile cannot be activated through spring.profiles.include");
         }
         for (final String navn : Set.of("NAIS_CLUSTER_NAME", "NAIS_APP_NAME", "KUBERNETES_SERVICE_HOST",
                 "READWRITE_PGJDBCURL", "PGJDBCURL")) {
-            if (miljo.containsProperty(navn)) {
+            if (miljø.containsProperty(navn)) {
                 throw new IllegalStateException("The local profile cannot be used with " + navn);
             }
         }
-        for (final PropertySource<?> kilde : miljo.getPropertySources()) {
+        for (final PropertySource<?> kilde : miljø.getPropertySources()) {
             if (kilde instanceof EnumerablePropertySource<?> egenskaper
                     && Arrays.stream(egenskaper.getPropertyNames()).anyMatch(navn -> navn.startsWith("NAIS_DATABASE_"))) {
                 throw new IllegalStateException("The local profile cannot be used with NAIS_DATABASE_* settings");
             }
         }
         for (final String navn : Set.of("spring.datasource.url", "spring.liquibase.url")) {
-            validerDatabaseUrl(navn, miljo.getProperty(navn));
+            validerDatabaseUrl(navn, miljø.getProperty(navn));
         }
-        final String hikariUrl = miljo.getProperty("spring.datasource.hikari.jdbc-url");
+        final String hikariUrl = miljø.getProperty("spring.datasource.hikari.jdbc-url");
         if (hikariUrl != null) {
             validerDatabaseUrl("spring.datasource.hikari.jdbc-url", hikariUrl);
         }

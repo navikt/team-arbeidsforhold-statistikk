@@ -41,7 +41,7 @@ class KopierNvdCveDataTest {
     private final List<String> foresporsler = new ArrayList<>();
     private String metadata = "sha256=" + HASH;
     private byte[] feed;
-    private KopierNvdCveData importor;
+    private KopierNvdCveData importør;
 
     @BeforeEach
     void oppsett() throws IOException {
@@ -63,7 +63,7 @@ class KopierNvdCveDataTest {
                     return Mono.just(ClientResponse.create(HttpStatus.OK)
                             .body(Flux.just(DefaultDataBufferFactory.sharedInstance.wrap(feed))).build());
                 }).build();
-        importor = new KopierNvdCveData(webClient, metadataRepository, vulnerabilityService);
+        importør = new KopierNvdCveData(webClient, metadataRepository, vulnerabilityService);
     }
 
     @ParameterizedTest
@@ -71,7 +71,7 @@ class KopierNvdCveDataTest {
     void lagrerAlvorlighetsgradFraCvssDataFørMetadata(final String felt, final String versjon) throws Exception {
         feed = gzip(feed(felt, versjon, ""));
 
-        assertThat(importor.kopierNvdCveDataTilDatabase().get()).isTrue();
+        assertThat(importør.kopierNvdCveDataTilDatabase().get()).isTrue();
 
         final ArgumentCaptor<List<CveNvd>> sårbarheter = ArgumentCaptor.captor();
         final InOrder rekkefolge = inOrder(vulnerabilityService, metadataRepository);
@@ -94,7 +94,7 @@ class KopierNvdCveDataTest {
                 {"type":"Secondary","cvssData":{"version":"4.0","baseScore":7.0,"baseSeverity":"HIGH"}},
                 """));
 
-        importor.kopierNvdCveDataTilDatabase().get();
+        importør.kopierNvdCveDataTilDatabase().get();
 
         verify(vulnerabilityService).lagreNvdData(argThat(sårbarheter ->
                 sårbarheter.size() == 1 && "CRITICAL".equals(sårbarheter.getFirst().getBaseSeverity())));
@@ -102,8 +102,8 @@ class KopierNvdCveDataTest {
 
     @Test
     void uendretFeedLasterIkkeDataPåNytt() throws Exception {
-        assertThat(importor.kopierNvdCveDataTilDatabase().get()).isTrue();
-        assertThat(importor.kopierNvdCveDataTilDatabase().get()).isFalse();
+        assertThat(importør.kopierNvdCveDataTilDatabase().get()).isTrue();
+        assertThat(importør.kopierNvdCveDataTilDatabase().get()).isFalse();
 
         assertThat(foresporsler.stream().filter(sti -> sti.endsWith(".json.gz"))).hasSize(1);
         verify(vulnerabilityService, times(1)).lagreNvdData(anyList());
@@ -114,11 +114,11 @@ class KopierNvdCveDataTest {
     void mislykketLagringBeholderGammelHashSlikAtNesteImportPrøverIgjen() throws Exception {
         doThrow(new IllegalStateException("Testfeil")).doNothing().when(vulnerabilityService).lagreNvdData(anyList());
 
-        assertThrows(IllegalStateException.class, () -> importor.kopierNvdCveDataTilDatabase());
+        assertThrows(IllegalStateException.class, () -> importør.kopierNvdCveDataTilDatabase());
 
         assertThat(lagredeMetadata.get()).isNull();
         verify(metadataRepository, never()).save(any(CveNvdMeta.class));
-        assertThat(importor.kopierNvdCveDataTilDatabase().get()).isTrue();
+        assertThat(importør.kopierNvdCveDataTilDatabase().get()).isTrue();
         assertThat(foresporsler.stream().filter(sti -> sti.endsWith(".json.gz"))).hasSize(2);
     }
 
@@ -126,7 +126,7 @@ class KopierNvdCveDataTest {
     void ugyldigGzipLagrerIkkeHash() {
         feed = "ikke gzip".getBytes(StandardCharsets.UTF_8);
 
-        assertThrows(IOException.class, () -> importor.kopierNvdCveDataTilDatabase());
+        assertThrows(IOException.class, () -> importør.kopierNvdCveDataTilDatabase());
 
         verifyNoInteractions(vulnerabilityService);
         verify(metadataRepository, never()).save(any(CveNvdMeta.class));
@@ -136,7 +136,7 @@ class KopierNvdCveDataTest {
     void ugyldigFeedstrukturLagrerIkkeHash() throws IOException {
         feed = gzip("{\"vulnerabilities\":{}}");
 
-        assertThrows(IOException.class, () -> importor.kopierNvdCveDataTilDatabase());
+        assertThrows(IOException.class, () -> importør.kopierNvdCveDataTilDatabase());
 
         verifyNoInteractions(vulnerabilityService);
         verify(metadataRepository, never()).save(any(CveNvdMeta.class));
@@ -146,7 +146,7 @@ class KopierNvdCveDataTest {
     void ugyldigeMetadataAvvisesFørNedlasting() {
         metadata = "sha256=ikke-en-hash";
 
-        assertThrows(IOException.class, () -> importor.kopierNvdCveDataTilDatabase());
+        assertThrows(IOException.class, () -> importør.kopierNvdCveDataTilDatabase());
 
         assertThat(foresporsler).noneMatch(sti -> sti.endsWith(".json.gz"));
         verifyNoInteractions(vulnerabilityService);
