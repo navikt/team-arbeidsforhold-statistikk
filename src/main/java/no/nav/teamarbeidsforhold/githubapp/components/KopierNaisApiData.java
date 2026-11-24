@@ -12,13 +12,16 @@ import no.nav.teamarbeidsforhold.githubapp.repository.WorkloadRepository;
 import org.springframework.graphql.client.HttpGraphQlClient;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -31,8 +34,9 @@ public class KopierNaisApiData {
     private final WorkloadRepository workloadRepository;
     private final VulnerabilityRepository vulnerabilityRepository;
     private final DeploymentVulnerabilityRepository deploymentVulnerabilityRepository;
+    private final TransactionTemplate transactionTemplate;
 
-    public KopierNaisApiData(final HttpGraphQlClient naisApi, final DeploymentRepository deploymentRepository, final ManifestParser manifestParser, final Clock klokke, final WorkloadRepository workloadRepository, final VulnerabilityRepository vulnerabilityRepository, final DeploymentVulnerabilityRepository deploymentVulnerabilityRepository) {
+    public KopierNaisApiData(final HttpGraphQlClient naisApi, final DeploymentRepository deploymentRepository, final ManifestParser manifestParser, final Clock klokke, final WorkloadRepository workloadRepository, final VulnerabilityRepository vulnerabilityRepository, final DeploymentVulnerabilityRepository deploymentVulnerabilityRepository, final TransactionTemplate transactionTemplate) {
         this.naisApi = naisApi;
         this.deploymentRepository = deploymentRepository;
         this.manifestParser = manifestParser;
@@ -40,11 +44,14 @@ public class KopierNaisApiData {
         this.workloadRepository = workloadRepository;
         this.vulnerabilityRepository = vulnerabilityRepository;
         this.deploymentVulnerabilityRepository = deploymentVulnerabilityRepository;
+        this.transactionTemplate = transactionTemplate;
     }
 
     public CompletableFuture<Void> kopierNaisApiDataTilDatabase() {
         return naisApi.documentName("workloads-med-critical-cve").retrieve("team").toEntity(Team.class)
-                .timeout(Duration.ofMinutes(5)).doOnNext(this::lagre).then().toFuture();
+                .timeout(Duration.ofMinutes(5))
+                .doOnNext(team -> transactionTemplate.executeWithoutResult(_ -> lagre(team)))
+                .then().toFuture();
     }
 
     private void lagre(final Team team) {
@@ -102,6 +109,14 @@ public class KopierNaisApiData {
         vulnerabilityRepository.saveAll(nyeSårbarheter);
         workloadRepository.saveAll(nyeWorkloads);
         deploymentRepository.saveAll(nyeDeployments);
+        final Set<DeploymentVulnerabilityId> gjeldendeSårbarhetsIder = nyeSårbarheterFunnet.stream()
+                .map(DeploymentVulnerability::getId).collect(Collectors.toSet());
+        nyeDeployments.stream().map(Deployment::getId).distinct().forEach(id -> deploymentVulnerabilityRepository.deleteAll(
+                deploymentVulnerabilityRepository.findAllByDeployment_Id(id).stream()
+                        .filter(sårbarhet -> !gjeldendeSårbarhetsIder.contains(sårbarhet.getId()))
+                        .toList()));
+        nyeSårbarheterFunnet.forEach(sårbarhet ->
+                sårbarhet.setVulnerability(vulnerabilityRepository.getReferenceById(sårbarhet.getId().getVulnerabilityId())));
         deploymentVulnerabilityRepository.saveAll(nyeSårbarheterFunnet);
     }
 }
