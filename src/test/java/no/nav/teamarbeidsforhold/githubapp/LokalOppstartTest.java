@@ -5,6 +5,9 @@ import no.nav.teamarbeidsforhold.githubapp.components.GithubOppdateringsKø;
 import no.nav.teamarbeidsforhold.githubapp.components.KopierNaisApiData;
 import no.nav.teamarbeidsforhold.githubapp.components.KopierNvdCveData;
 import no.nav.teamarbeidsforhold.githubapp.components.LederUtpekerServerSideEventHåndterer;
+import no.nav.teamarbeidsforhold.githubapp.components.SlackSender;
+import no.nav.teamarbeidsforhold.githubapp.components.TidsstyrteHandlinger;
+import com.slack.api.Slack;
 import no.nav.teamarbeidsforhold.githubapp.controller.AdminController;
 import no.nav.teamarbeidsforhold.githubapp.controller.LokalRepoController;
 import no.nav.teamarbeidsforhold.githubapp.controller.RepoController;
@@ -84,7 +87,8 @@ class LokalOppstartTest {
     void oppretterIkkeEksterneIntegrasjonerEllerAdmin() {
         for (final Class<?> type : List.of(GitHub.class, GithubOppdateringsKø.class,
                 KopierNaisApiData.class, KopierNvdCveData.class, LederUtpekerServerSideEventHåndterer.class,
-                AdminController.class, RepoController.class, JwtDecoder.class)) {
+                AdminController.class, RepoController.class, JwtDecoder.class,
+                Slack.class, SlackSender.class, TidsstyrteHandlinger.class)) {
             assertTrue(kontekst.getBeansOfType(type).isEmpty(), type.getSimpleName());
         }
         assertNotNull(kontekst.getBean(LokalRepoController.class));

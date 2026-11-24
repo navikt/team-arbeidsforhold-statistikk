@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +43,8 @@ public class KopierNaisApiData {
     }
 
     public CompletableFuture<Void> kopierNaisApiDataTilDatabase() {
-        return naisApi.documentName("workloads-med-critical-cve").retrieve("team").toEntity(Team.class).doOnNext(this::lagre).then().toFuture();
+        return naisApi.documentName("workloads-med-critical-cve").retrieve("team").toEntity(Team.class)
+                .timeout(Duration.ofMinutes(5)).doOnNext(this::lagre).then().toFuture();
     }
 
     private void lagre(final Team team) {
