@@ -7,6 +7,8 @@ import com.slack.api.SlackConfig;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.chat.ChatPostMessageRequest;
 import com.slack.api.util.http.SlackHttpClient;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import no.nav.teamarbeidsforhold.githubapp.components.KritiskeSårbarheterAnalyse;
 import no.nav.teamarbeidsforhold.githubapp.components.KopierNaisApiData;
 import no.nav.teamarbeidsforhold.githubapp.components.KopierNvdCveData;
@@ -41,6 +43,7 @@ class SlackKonfigurasjonTest {
             .withUserConfiguration(Egenskaper.class, SlackKonfigurasjon.class, TidsstyringKonfigurasjon.class,
                     SlackSender.class, TidsstyrteHandlinger.class)
             .withBean(Clock.class, Clock::systemUTC)
+            .withBean(MeterRegistry.class, SimpleMeterRegistry::new)
             .withBean(CriticalVulnerabilityNoticeRepository.class, () -> mock(CriticalVulnerabilityNoticeRepository.class))
             .withBean(KritiskeSårbarheterAnalyse.class, () -> mock(KritiskeSårbarheterAnalyse.class))
             .withBean(LederUtpeker.class, () -> mock(LederUtpeker.class))

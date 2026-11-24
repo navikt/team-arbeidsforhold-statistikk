@@ -8,6 +8,7 @@ import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.chat.ChatPostMessageRequest;
 import com.slack.api.methods.response.chat.ChatPostMessageResponse;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import no.nav.teamarbeidsforhold.githubapp.entity.CriticalVulnerabilityNoticeId;
 import no.nav.teamarbeidsforhold.githubapp.properties.SlackInnstillinger;
 import no.nav.teamarbeidsforhold.githubapp.repository.CriticalVulnerabilityNoticeRepository;
@@ -27,7 +28,6 @@ import org.springframework.dao.DataAccessResourceFailureException;
 
 import java.io.IOException;
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -45,20 +45,21 @@ class SlackSenderTest {
     private final MethodsClient slackMethods = mock(MethodsClient.class);
     private final CriticalVulnerabilityNoticeRepository repository = mock(CriticalVulnerabilityNoticeRepository.class);
     private final Clock klokke = mock(Clock.class);
+    private final SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
     private final AtomicReference<Instant> tidspunkt = new AtomicReference<>(NÅ);
     private final CriticalVulnerabilityNoticeId id = new CriticalVulnerabilityNoticeId();
     private final ListAppender<ILoggingEvent> logger = new ListAppender<>();
     private final Logger senderLogger = (Logger) LoggerFactory.getLogger(SlackSender.class);
     private final SlackSender sender = new SlackSender(
-            new SlackInnstillinger(HEMMELIGHET, "#testkanal"), slackMethods, repository, klokke);
+            new SlackInnstillinger(HEMMELIGHET, "#testkanal"), slackMethods, repository, klokke, meterRegistry);
 
     @BeforeEach
     void oppsett() throws Exception {
         id.setVulnerabilityId("CVE-2026-12345");
         id.setChannel("slack");
         when(klokke.instant()).thenAnswer(invocation -> tidspunkt.get());
-        when(repository.findPendingSlackNotices(any(), any())).thenReturn(List.of(id));
-        when(repository.reserveForSending(eq(id), any(), any(), eq("slack-bot"))).thenReturn(1, 0);
+        when(repository.findPendingSlackNotices(any())).thenReturn(List.of(id));
+        when(repository.reserveForSending(eq(id), any(), eq("slack-bot"))).thenReturn(1, 0);
         when(repository.releaseForRetry(eq(id), any(), eq("slack-bot"))).thenReturn(1);
         when(slackMethods.chatPostMessage(any(ChatPostMessageRequest.class))).thenReturn(svar(true, null));
         logger.start();
@@ -69,6 +70,7 @@ class SlackSenderTest {
     void fjernLogger() {
         senderLogger.detachAppender(logger);
         logger.stop();
+        meterRegistry.close();
     }
 
     @Test
@@ -78,8 +80,8 @@ class SlackSenderTest {
 
         final ArgumentCaptor<ChatPostMessageRequest> melding = ArgumentCaptor.forClass(ChatPostMessageRequest.class);
         final InOrder rekkefolge = inOrder(repository, slackMethods);
-        rekkefolge.verify(repository).findPendingSlackNotices(NÅ.minus(Duration.ofHours(36)), NÅ);
-        rekkefolge.verify(repository).reserveForSending(id, NÅ.minus(Duration.ofHours(36)), NÅ, "slack-bot");
+        rekkefolge.verify(repository).findPendingSlackNotices(NÅ);
+        rekkefolge.verify(repository).reserveForSending(id, NÅ, "slack-bot");
         rekkefolge.verify(slackMethods).chatPostMessage(melding.capture());
         verify(slackMethods, times(1)).chatPostMessage(any(ChatPostMessageRequest.class));
         verify(repository, never()).releaseForRetry(any(), any(), any());
@@ -90,6 +92,7 @@ class SlackSenderTest {
         assertThat(melding.getValue().isUnfurlLinks()).isFalse();
         assertThat(melding.getValue().isUnfurlMedia()).isFalse();
         assertThat(loggtekst()).contains("bekreftet sendt");
+        assertThat(meterRegistry.get("slack.varsler").tag("utfall", "bekreftet").counter().count()).isEqualTo(1);
     }
 
     @Test
@@ -102,6 +105,7 @@ class SlackSenderTest {
         verify(slackMethods, times(1)).chatPostMessage(any(ChatPostMessageRequest.class));
         verify(repository, never()).releaseForRetry(any(), any(), any());
         assertThat(loggtekst()).contains("Usikker Slack-levering", "IOException").doesNotContain(HEMMELIGHET);
+        assertThat(meterRegistry.get("slack.varsler").tag("utfall", "usikker").counter().count()).isEqualTo(1);
     }
 
     @Test
@@ -112,6 +116,33 @@ class SlackSenderTest {
 
         verify(repository, never()).releaseForRetry(any(), any(), any());
         assertThat(loggtekst()).contains("Usikker Slack-levering").doesNotContain(HEMMELIGHET);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void senderBareEttVarselPerKjøringOgsåVedUkjentSvar(final boolean bekreftet) throws Exception {
+        final CriticalVulnerabilityNoticeId nesteId = new CriticalVulnerabilityNoticeId();
+        nesteId.setVulnerabilityId("CVE-2026-54321");
+        nesteId.setChannel("slack");
+        when(repository.findPendingSlackNotices(any())).thenReturn(List.of(id, nesteId));
+        when(repository.reserveForSending(eq(nesteId), any(), eq("slack-bot"))).thenReturn(1);
+        when(slackMethods.chatPostMessage(any(ChatPostMessageRequest.class)))
+                .thenReturn(svar(bekreftet, bekreftet ? null : "internal_error"));
+
+        sender.sendKritiskSårbarhetsMeldinger();
+
+        verify(slackMethods, times(1)).chatPostMessage(any(ChatPostMessageRequest.class));
+        verify(repository, never()).reserveForSending(eq(nesteId), any(), any());
+        verify(repository, never()).releaseForRetry(any(), any(), any());
+        assertThat(meterRegistry.get("slack.varsler").tag("utfall", bekreftet ? "bekreftet" : "usikker")
+                .counter().count()).isEqualTo(1);
+
+        tidspunkt.set(NÅ.plusSeconds(60));
+        sender.sendKritiskSårbarhetsMeldinger();
+
+        final ArgumentCaptor<ChatPostMessageRequest> meldinger = ArgumentCaptor.forClass(ChatPostMessageRequest.class);
+        verify(slackMethods, times(2)).chatPostMessage(meldinger.capture());
+        assertThat(meldinger.getAllValues().get(1).getText()).contains("CVE-2026-54321");
     }
 
     @ParameterizedTest
@@ -126,17 +157,23 @@ class SlackSenderTest {
         assertThat(loggtekst()).contains("antar sendt uten nytt forsøk").doesNotContain(HEMMELIGHET);
     }
 
-    @Test
-    void sikkerAvvisningKanPrøvesIgjen() throws Exception {
-        when(repository.reserveForSending(eq(id), any(), any(), eq("slack-bot"))).thenReturn(1);
+    @ParameterizedTest
+    @ValueSource(strings = {"not_in_channel", "invalid_auth", "ratelimited"})
+    void sikkerAvvisningKanPrøvesIgjenEtterTrettiMinutter(final String feilkode) throws Exception {
+        when(repository.reserveForSending(eq(id), any(), eq("slack-bot"))).thenReturn(1);
         when(slackMethods.chatPostMessage(any(ChatPostMessageRequest.class)))
-                .thenReturn(svar(false, "not_in_channel"), svar(true, null));
+                .thenReturn(svar(false, feilkode), svar(true, null));
 
         sender.sendKritiskSårbarhetsMeldinger();
+        tidspunkt.set(NÅ.plusSeconds(1799));
+        sender.sendKritiskSårbarhetsMeldinger();
+        verify(slackMethods, times(1)).chatPostMessage(any(ChatPostMessageRequest.class));
+        tidspunkt.set(NÅ.plusSeconds(1800));
         sender.sendKritiskSårbarhetsMeldinger();
 
         verify(repository).releaseForRetry(id, NÅ, "slack-bot");
         verify(slackMethods, times(2)).chatPostMessage(any(ChatPostMessageRequest.class));
+        assertThat(meterRegistry.get("slack.varsler").tag("utfall", "sikker_avvisning").counter().count()).isEqualTo(1);
     }
 
     @Test
@@ -144,8 +181,8 @@ class SlackSenderTest {
         final CriticalVulnerabilityNoticeId nesteId = new CriticalVulnerabilityNoticeId();
         nesteId.setVulnerabilityId("CVE-2026-54321");
         nesteId.setChannel("slack");
-        when(repository.findPendingSlackNotices(any(), any())).thenReturn(List.of(id, nesteId));
-        when(repository.reserveForSending(eq(id), any(), any(), eq("slack-bot"))).thenReturn(1);
+        when(repository.findPendingSlackNotices(any())).thenReturn(List.of(id, nesteId));
+        when(repository.reserveForSending(eq(id), any(), eq("slack-bot"))).thenReturn(1);
         when(slackMethods.chatPostMessage(any(ChatPostMessageRequest.class)))
                 .thenThrow(httpFeil(429, "7200")).thenReturn(svar(true, null));
 
@@ -153,8 +190,8 @@ class SlackSenderTest {
         tidspunkt.set(NÅ.plusSeconds(7199));
         sender.sendKritiskSårbarhetsMeldinger();
 
-        verify(repository, times(1)).findPendingSlackNotices(any(), any());
-        verify(repository, never()).reserveForSending(eq(nesteId), any(), any(), any());
+        verify(repository, times(1)).findPendingSlackNotices(any());
+        verify(repository, never()).reserveForSending(eq(nesteId), any(), any());
         verify(repository).releaseForRetry(id, NÅ, "slack-bot");
 
         tidspunkt.set(NÅ.plusSeconds(7200));
@@ -166,7 +203,7 @@ class SlackSenderTest {
     @NullAndEmptySource
     @ValueSource(strings = {"ugyldig", "0", "-1"})
     void ugyldigRetryAfterLoggesOgGirTrettiMinuttersPause(final String retryAfter) throws Exception {
-        when(repository.reserveForSending(eq(id), any(), any(), eq("slack-bot"))).thenReturn(1);
+        when(repository.reserveForSending(eq(id), any(), eq("slack-bot"))).thenReturn(1);
         when(slackMethods.chatPostMessage(any(ChatPostMessageRequest.class)))
                 .thenThrow(httpFeil(429, retryAfter)).thenReturn(svar(true, null));
 
@@ -192,7 +229,7 @@ class SlackSenderTest {
 
     @Test
     void databasefeilFørSendingHindrerSlackKall() {
-        when(repository.reserveForSending(eq(id), any(), any(), any()))
+        when(repository.reserveForSending(eq(id), any(), any()))
                 .thenThrow(new DataAccessResourceFailureException(HEMMELIGHET));
 
         sender.sendKritiskSårbarhetsMeldinger();
@@ -218,7 +255,7 @@ class SlackSenderTest {
 
         sender.sendKritiskSårbarhetsMeldinger();
 
-        verify(repository, never()).reserveForSending(any(), any(), any(), any());
+        verify(repository, never()).reserveForSending(any(), any(), any());
         verifyNoInteractions(slackMethods);
         assertThat(loggtekst()).contains("ugyldig CVE-ID").doesNotContain(HEMMELIGHET, "<!channel>");
     }

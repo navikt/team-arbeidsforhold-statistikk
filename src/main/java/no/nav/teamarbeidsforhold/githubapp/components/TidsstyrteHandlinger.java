@@ -38,18 +38,28 @@ public class TidsstyrteHandlinger {
             kopierNaisApiData.kopierNaisApiDataTilDatabase().get(15, TimeUnit.MINUTES);
         } catch (final IOException | ExecutionException | TimeoutException | CancellationException e) {
             final Throwable feil = e instanceof ExecutionException && e.getCause() != null ? e.getCause() : e;
-            log.error("Daglig dataoppdatering feilet: {}. Sender ingen Slack-varsler",
+            log.error("Daglig dataoppdatering feilet: {}. Ingen nye Slack-varsler opprettes",
                     feil.getClass().getSimpleName());
             return;
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
-            log.error("Daglig dataoppdatering ble avbrutt. Sender ingen Slack-varsler");
+            log.error("Daglig dataoppdatering ble avbrutt. Ingen nye Slack-varsler opprettes");
             return;
         }
         log.info("Daglig dataoppdatering fullført");
         final SlackSender sender = slackSender.getIfAvailable();
         if (sender != null) {
             analyse.sjekkSårbarheter();
+        }
+    }
+
+    @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.MINUTES)
+    public void sendVentendeSlackVarsler() {
+        if (!lederUtpeker.erLeder()) {
+            return;
+        }
+        final SlackSender sender = slackSender.getIfAvailable();
+        if (sender != null) {
             sender.sendKritiskSårbarhetsMeldinger();
         }
     }

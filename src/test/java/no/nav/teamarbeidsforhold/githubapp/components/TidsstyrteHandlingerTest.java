@@ -34,7 +34,7 @@ class TidsstyrteHandlingerTest {
     }
 
     @Test
-    void lederOppdatererDataFørVarselanalyseOgSending() throws IOException {
+    void lederOppdatererDataOgAnalysererUtenSending() throws IOException {
         when(lederUtpeker.erLeder()).thenReturn(true);
         when(slackSenderProvider.getIfAvailable()).thenReturn(slackSender);
         fullførImporter(true);
@@ -45,11 +45,11 @@ class TidsstyrteHandlingerTest {
         rekkefolge.verify(nvd).kopierNvdCveDataTilDatabase();
         rekkefolge.verify(deployment).kopierNaisApiDataTilDatabase();
         rekkefolge.verify(analyse).sjekkSårbarheter();
-        rekkefolge.verify(slackSender).sendKritiskSårbarhetsMeldinger();
+        verifyNoInteractions(slackSender);
     }
 
     @Test
-    void uendretNvdDataForhindrerIkkeAndreOppdateringerEllerVarsling() throws IOException {
+    void uendretNvdDataForhindrerIkkeAndreOppdateringerEllerAnalyse() throws IOException {
         when(lederUtpeker.erLeder()).thenReturn(true);
         when(slackSenderProvider.getIfAvailable()).thenReturn(slackSender);
         fullførImporter(false);
@@ -58,7 +58,7 @@ class TidsstyrteHandlingerTest {
 
         verify(deployment).kopierNaisApiDataTilDatabase();
         verify(analyse).sjekkSårbarheter();
-        verify(slackSender).sendKritiskSårbarhetsMeldinger();
+        verifyNoInteractions(slackSender);
     }
 
     @Test
@@ -114,7 +114,7 @@ class TidsstyrteHandlingerTest {
         verify(nvdResultat).get(15, TimeUnit.MINUTES);
         verify(deploymentResultat).get(15, TimeUnit.MINUTES);
         verify(analyse).sjekkSårbarheter();
-        verify(slackSender).sendKritiskSårbarhetsMeldinger();
+        verifyNoInteractions(slackSender);
     }
 
     @ParameterizedTest
@@ -168,6 +168,46 @@ class TidsstyrteHandlingerTest {
         assertThat(plan).isNotNull();
         assertThat(plan.cron()).isEqualTo("0 0 5 * * *");
         assertThat(plan.zone()).isEqualTo("Europe/Oslo");
+    }
+
+    @Test
+    void lederSenderVentendeVarslerUtenImportEllerAnalyse() {
+        when(lederUtpeker.erLeder()).thenReturn(true);
+        when(slackSenderProvider.getIfAvailable()).thenReturn(slackSender);
+
+        meldinger.sendVentendeSlackVarsler();
+
+        verify(slackSender).sendKritiskSårbarhetsMeldinger();
+        verifyNoInteractions(nvd, deployment, analyse);
+    }
+
+    @Test
+    void ikkeLederSenderIkkeVentendeVarsler() {
+        meldinger.sendVentendeSlackVarsler();
+
+        verifyNoInteractions(slackSenderProvider, slackSender, nvd, deployment, analyse);
+    }
+
+    @Test
+    void manglendeSlackSenderSenderIkkeVentendeVarsler() {
+        when(lederUtpeker.erLeder()).thenReturn(true);
+        when(slackSenderProvider.getIfAvailable()).thenReturn(null);
+
+        meldinger.sendVentendeSlackVarsler();
+
+        verify(slackSenderProvider).getIfAvailable();
+        verifyNoInteractions(slackSender, nvd, deployment, analyse);
+    }
+
+    @Test
+    void ventendeVarslerPlanleggesMedEttMinuttsForsinkelse() throws NoSuchMethodException {
+        final Scheduled plan = TidsstyrteHandlinger.class
+                .getMethod("sendVentendeSlackVarsler")
+                .getAnnotation(Scheduled.class);
+
+        assertThat(plan).isNotNull();
+        assertThat(plan.fixedDelay()).isEqualTo(1);
+        assertThat(plan.timeUnit()).isEqualTo(TimeUnit.MINUTES);
     }
 
     private void fullførImporter(final boolean nvdEndret) throws IOException {
