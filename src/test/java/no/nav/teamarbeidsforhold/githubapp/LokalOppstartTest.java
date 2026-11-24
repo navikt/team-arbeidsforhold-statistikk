@@ -96,7 +96,7 @@ class LokalOppstartTest {
     }
 
     @Test
-    void avviserAdminOgsaaMedGyldigCsrfToken() throws Exception {
+    void avviserAdminOgsåMedGyldigCsrfToken() throws Exception {
         final MockHttpSession session = new MockHttpSession();
         final MvcResult resultat = mvc.perform(get("/api/me").session(session)).andExpect(status().isOk()).andReturn();
         final CsrfToken token = (CsrfToken) resultat.getRequest().getAttribute(CsrfToken.class.getName());

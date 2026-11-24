@@ -16,27 +16,27 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-class KritiskeSaarbarheterAnalyseTest {
+class KritiskeSårbarheterAnalyseTest {
     @Test
-    void oppretterNyeVarslerUtenAaOverskriveEksisterende() {
-        final Instant naa = Instant.parse("2026-11-24T11:00:00Z");
+    void oppretterNyeVarslerUtenÅOverskriveEksisterende() {
+        final Instant nå = Instant.parse("2026-11-24T11:00:00Z");
         final DeploymentVulnerabilityRepository repository = mock(DeploymentVulnerabilityRepository.class);
         final EntityManager entityManager = mock(EntityManager.class);
-        final Vulnerability saarbarhet = new Vulnerability();
-        saarbarhet.setId("CVE-2026-12345");
-        when(repository.findDeployedWithoutNotice("CRITICAL", naa.minus(Duration.ofHours(36)), naa))
-                .thenReturn(List.of(saarbarhet));
+        final Vulnerability sårbarhet = new Vulnerability();
+        sårbarhet.setId("CVE-2026-12345");
+        when(repository.findDeployedWithoutNotice("CRITICAL", nå.minus(Duration.ofHours(36)), nå))
+                .thenReturn(List.of(sårbarhet));
         final KritiskeSårbarheterAnalyse analyse = new KritiskeSårbarheterAnalyse(
-                entityManager, repository, Clock.fixed(naa, ZoneOffset.UTC));
+                entityManager, repository, Clock.fixed(nå, ZoneOffset.UTC));
 
         analyse.sjekkSårbarheter();
 
         final ArgumentCaptor<CriticalVulnerabilityNotice> varsel = ArgumentCaptor.forClass(CriticalVulnerabilityNotice.class);
         verify(entityManager).persist(varsel.capture());
         verifyNoMoreInteractions(entityManager);
-        assertThat(varsel.getValue().getId().getVulnerabilityId()).isEqualTo(saarbarhet.getId());
+        assertThat(varsel.getValue().getId().getVulnerabilityId()).isEqualTo(sårbarhet.getId());
         assertThat(varsel.getValue().getId().getChannel()).isEqualTo("slack");
-        assertThat(varsel.getValue().getFirstNoticed()).isEqualTo(naa);
+        assertThat(varsel.getValue().getFirstNoticed()).isEqualTo(nå);
         assertThat(varsel.getValue().getWhenSent()).isNull();
     }
 }

@@ -48,7 +48,7 @@ class SlackKonfigurasjonTest {
             .withBean(KopierNaisApiData.class, () -> mock(KopierNaisApiData.class));
 
     @Test
-    void utenTokenStopperOppstartUtenAaLekkeKonfigurasjon() {
+    void utenTokenStopperOppstartUtenÅLekkeKonfigurasjon() {
         kontekst.run(kontekst -> {
             assertThat(kontekst).hasFailed();
             assertThat(kontekst.getStartupFailure()).hasRootCauseMessage(

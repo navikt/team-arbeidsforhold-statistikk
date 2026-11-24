@@ -48,7 +48,7 @@ class LokalKonfigurasjonTest {
     }
 
     @Test
-    void stopperOppstartFoerDatabaseOgSikkerhetskjedeOpprettes() {
+    void stopperOppstartFørDatabaseOgSikkerhetskjedeOpprettes() {
         new ApplicationContextRunner()
                 .withUserConfiguration(LokalKonfigurasjon.class)
                 .withInitializer(kontekst -> kontekst.getEnvironment().setActiveProfiles("local", "prod"))

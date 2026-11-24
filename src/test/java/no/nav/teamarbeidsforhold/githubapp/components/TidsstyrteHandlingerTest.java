@@ -34,7 +34,7 @@ class TidsstyrteHandlingerTest {
     }
 
     @Test
-    void lederOppdatererDataFoerVarselanalyseOgSending() throws IOException {
+    void lederOppdatererDataFørVarselanalyseOgSending() throws IOException {
         when(lederUtpeker.erLeder()).thenReturn(true);
         when(slackSenderProvider.getIfAvailable()).thenReturn(slackSender);
         fullførImporter(true);
@@ -160,7 +160,7 @@ class TidsstyrteHandlingerTest {
     }
 
     @Test
-    void dagligKjoringErPlanlagtKlokkenFemIOslo() throws NoSuchMethodException {
+    void dagligKjøringErPlanlagtKlokkenFemIOslo() throws NoSuchMethodException {
         final Scheduled plan = TidsstyrteHandlinger.class
                 .getMethod("oppdaterSårbarheterMedVarsel")
                 .getAnnotation(Scheduled.class);

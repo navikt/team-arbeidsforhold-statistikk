@@ -85,12 +85,12 @@ public class KopierNvdCveData {
                 .block(Duration.ofMinutes(5));
         try (GZIPInputStream gzip = new GZIPInputStream(new ByteArrayInputStream(Objects.requireNonNull(bytes)))) {
             final JsonNode root = new ObjectMapper().readTree(gzip);
-            final JsonNode saarbarheter = root.required("vulnerabilities");
-            if (!saarbarheter.isArray()) {
+            final JsonNode sårbarheter = root.required("vulnerabilities");
+            if (!sårbarheter.isArray()) {
                 throw new IOException("NVD-feeden mangler en liste med sårbarheter");
             }
             final List<CveNvd> cveNvds = new ArrayList<>();
-            for (final JsonNode v : saarbarheter) {
+            for (final JsonNode v : sårbarheter) {
                 final JsonNode cve = v.path("cve");
                 final CveNvd cveNvd = new CveNvd();
                 final String id = cve.required("id").asString();

@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.teamarbeidsforhold.githubapp.entity.CriticalVulnerabilityNoticeId;
 import no.nav.teamarbeidsforhold.githubapp.properties.SlackInnstillinger;
 import no.nav.teamarbeidsforhold.githubapp.repository.CriticalVulnerabilityNoticeRepository;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
@@ -41,24 +40,24 @@ public class SlackSender {
     private final MethodsClient slackMethods;
     private final CriticalVulnerabilityNoticeRepository criticalVulnerabilityNoticeRepository;
     private final Clock klokke;
-    private Instant nesteForsoek = Instant.MIN;
+    private Instant nesteForsøk = Instant.MIN;
 
     public synchronized void sendKritiskSårbarhetsMeldinger() {
-        final Instant naa = klokke.instant();
-        if (naa.isBefore(nesteForsoek)) {
+        final Instant nå = klokke.instant();
+        if (nå.isBefore(nesteForsøk)) {
             return;
         }
         for (final CriticalVulnerabilityNoticeId id : criticalVulnerabilityNoticeRepository.findPendingSlackNotices(
-                naa.minus(KritiskeSårbarheterAnalyse.MAKSIMAL_CVE_ALDER), naa)) {
+                nå.minus(KritiskeSårbarheterAnalyse.MAKSIMAL_CVE_ALDER), nå)) {
             if (!CVE_ID.matcher(id.getVulnerabilityId()).matches()) {
                 log.error("Slack-varsel hoppet over: ugyldig CVE-ID");
                 continue;
             }
-            final Instant forsoekstid = klokke.instant().truncatedTo(ChronoUnit.MICROS);
+            final Instant forsøkstid = klokke.instant().truncatedTo(ChronoUnit.MICROS);
             log.info("Reserverer Slack-sendeforsøk for {}", id.getVulnerabilityId());
             try {
                 if (criticalVulnerabilityNoticeRepository.reserveForSending(id,
-                        forsoekstid.minus(KritiskeSårbarheterAnalyse.MAKSIMAL_CVE_ALDER), forsoekstid, AVSENDER) != 1) {
+                        forsøkstid.minus(KritiskeSårbarheterAnalyse.MAKSIMAL_CVE_ALDER), forsøkstid, AVSENDER) != 1) {
                     continue;
                 }
             } catch (final DataAccessException | TransactionException e) {
@@ -80,9 +79,9 @@ public class SlackSender {
                     log.info("Slack-varsel bekreftet sendt for {}", id.getVulnerabilityId());
                 } else if (svar != null && svar.getError() != null && SIKRE_AVVISNINGER.contains(svar.getError())) {
                     log.warn("Slack avviste varsel for {}: {}", id.getVulnerabilityId(), svar.getError());
-                    frigiReservasjon(id, forsoekstid);
+                    frigiReservasjon(id, forsøkstid);
                     if ("ratelimited".equals(svar.getError())) {
-                        nesteForsoek = klokke.instant().plus(Duration.ofMinutes(30));
+                        nesteForsøk = klokke.instant().plus(Duration.ofMinutes(30));
                     }
                     return;
                 } else {
@@ -91,10 +90,10 @@ public class SlackSender {
                 }
             } catch (final SlackApiException e) {
                 if (e.getResponse().code() == 429) {
-                    nesteForsoek = nesteTillatteForsoek(e.getResponse().header("Retry-After"));
+                    nesteForsøk = nesteTillatteForsøk(e.getResponse().header("Retry-After"));
                     log.warn("Slack begrenset senderaten for {}; neste forsøk tidligst {}",
-                            id.getVulnerabilityId(), nesteForsoek);
-                    frigiReservasjon(id, forsoekstid);
+                            id.getVulnerabilityId(), nesteForsøk);
+                    frigiReservasjon(id, forsøkstid);
                 } else {
                     log.error("Usikker Slack-levering for {}: HTTP {}, antar sendt uten nytt forsøk",
                             id.getVulnerabilityId(), e.getResponse().code());
@@ -108,9 +107,9 @@ public class SlackSender {
         }
     }
 
-    private void frigiReservasjon(final CriticalVulnerabilityNoticeId id, final Instant forsoekstid) {
+    private void frigiReservasjon(final CriticalVulnerabilityNoticeId id, final Instant forsøkstid) {
         try {
-            if (criticalVulnerabilityNoticeRepository.releaseForRetry(id, forsoekstid, AVSENDER) != 1) {
+            if (criticalVulnerabilityNoticeRepository.releaseForRetry(id, forsøkstid, AVSENDER) != 1) {
                 log.error("Slack-reservasjon for {} ble ikke frigitt; antar sendt uten nytt forsøk",
                         id.getVulnerabilityId());
             }
@@ -120,7 +119,7 @@ public class SlackSender {
         }
     }
 
-    private Instant nesteTillatteForsoek(final String retryAfter) {
+    private Instant nesteTillatteForsøk(final String retryAfter) {
         if (retryAfter != null) {
             try {
                 final long sekunder = Long.parseLong(retryAfter);

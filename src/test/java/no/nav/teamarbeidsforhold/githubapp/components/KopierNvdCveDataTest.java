@@ -68,16 +68,16 @@ class KopierNvdCveDataTest {
 
     @ParameterizedTest
     @CsvSource({"cvssMetricV40, 4.0", "cvssMetricV31, 3.1", "cvssMetricV30, 3.0"})
-    void lagrerAlvorlighetsgradFraCvssDataFoerMetadata(final String felt, final String versjon) throws Exception {
+    void lagrerAlvorlighetsgradFraCvssDataFørMetadata(final String felt, final String versjon) throws Exception {
         feed = gzip(feed(felt, versjon, ""));
 
         assertThat(importor.kopierNvdCveDataTilDatabase().get()).isTrue();
 
-        final ArgumentCaptor<List<CveNvd>> saarbarheter = ArgumentCaptor.captor();
+        final ArgumentCaptor<List<CveNvd>> sårbarheter = ArgumentCaptor.captor();
         final InOrder rekkefolge = inOrder(vulnerabilityService, metadataRepository);
-        rekkefolge.verify(vulnerabilityService).lagreNvdData(saarbarheter.capture());
+        rekkefolge.verify(vulnerabilityService).lagreNvdData(sårbarheter.capture());
         rekkefolge.verify(metadataRepository).save(any(CveNvdMeta.class));
-        assertThat(saarbarheter.getValue()).singleElement().satisfies(cve -> {
+        assertThat(sårbarheter.getValue()).singleElement().satisfies(cve -> {
             assertThat(cve.getCveId()).isEqualTo("CVE-2026-12345");
             assertThat(cve.getBaseSeverity()).isEqualTo("CRITICAL");
             assertThat(cve.getCvssVersion()).isEqualTo(versjon);
@@ -89,19 +89,19 @@ class KopierNvdCveDataTest {
     }
 
     @Test
-    void velgerPrimaervurderingenNaarFlereKilderFinnes() throws Exception {
+    void velgerPrimærvurderingenNårFlereKilderFinnes() throws Exception {
         feed = gzip(feed("cvssMetricV40", "4.0", """
                 {"type":"Secondary","cvssData":{"version":"4.0","baseScore":7.0,"baseSeverity":"HIGH"}},
                 """));
 
         importor.kopierNvdCveDataTilDatabase().get();
 
-        verify(vulnerabilityService).lagreNvdData(argThat(saarbarheter ->
-                saarbarheter.size() == 1 && "CRITICAL".equals(saarbarheter.getFirst().getBaseSeverity())));
+        verify(vulnerabilityService).lagreNvdData(argThat(sårbarheter ->
+                sårbarheter.size() == 1 && "CRITICAL".equals(sårbarheter.getFirst().getBaseSeverity())));
     }
 
     @Test
-    void uendretFeedLasterIkkeDataPaaNytt() throws Exception {
+    void uendretFeedLasterIkkeDataPåNytt() throws Exception {
         assertThat(importor.kopierNvdCveDataTilDatabase().get()).isTrue();
         assertThat(importor.kopierNvdCveDataTilDatabase().get()).isFalse();
 
@@ -111,7 +111,7 @@ class KopierNvdCveDataTest {
     }
 
     @Test
-    void mislykketLagringBeholderGammelHashSlikAtNesteImportProeverIgjen() throws Exception {
+    void mislykketLagringBeholderGammelHashSlikAtNesteImportPrøverIgjen() throws Exception {
         doThrow(new IllegalStateException("Testfeil")).doNothing().when(vulnerabilityService).lagreNvdData(anyList());
 
         assertThrows(IllegalStateException.class, () -> importor.kopierNvdCveDataTilDatabase());
@@ -143,7 +143,7 @@ class KopierNvdCveDataTest {
     }
 
     @Test
-    void ugyldigeMetadataAvvisesFoerNedlasting() {
+    void ugyldigeMetadataAvvisesFørNedlasting() {
         metadata = "sha256=ikke-en-hash";
 
         assertThrows(IOException.class, () -> importor.kopierNvdCveDataTilDatabase());
