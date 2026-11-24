@@ -48,26 +48,17 @@ class SlackKonfigurasjonTest {
             .withBean(KopierNaisApiData.class, () -> mock(KopierNaisApiData.class));
 
     @Test
-    void slackDeaktivertSomStandardMenDataoppdateringOgPlanleggingErAktiv() {
+    void utenTokenStopperOppstartUtenAaLekkeKonfigurasjon() {
         kontekst.run(kontekst -> {
-            assertThat(kontekst).hasNotFailed().doesNotHaveBean(Slack.class)
-                    .doesNotHaveBean(SlackSender.class).hasSingleBean(TidsstyrteHandlinger.class);
-            assertThat(kontekst).hasBean(TaskManagementConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME);
-        });
-    }
-
-    @Test
-    void aktivertUtenTokenStopperOppstartUtenAaLekkeKonfigurasjon() {
-        kontekst.withPropertyValues("slack.enabled=true").run(kontekst -> {
             assertThat(kontekst).hasFailed();
             assertThat(kontekst.getStartupFailure()).hasRootCauseMessage(
-                    "slack.token må være satt og bare inneholde synlige ASCII-tegn når Slack er aktivert");
+                    "slack.token må være satt og bare inneholde synlige ASCII-tegn");
         });
     }
 
     @Test
-    void aktiveringBinderStandardkanalOgOppretterPlanlegging() {
-        kontekst.withPropertyValues("slack.enabled=true", "slack.token=dummy-token").run(kontekst -> {
+    void binderStandardkanalOgOppretterPlanlegging() {
+        kontekst.withPropertyValues("slack.token=dummy-token").run(kontekst -> {
             assertThat(kontekst).hasNotFailed().hasSingleBean(SlackSender.class)
                     .hasSingleBean(TidsstyrteHandlinger.class);
             assertThat(kontekst).hasBean(TaskManagementConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME);
@@ -79,7 +70,7 @@ class SlackKonfigurasjonTest {
 
     @Test
     void deaktivertOppdateringFjernerPlanleggingSelvOmSlackErAktivert() {
-        kontekst.withPropertyValues("slack.enabled=true", "slack.token=dummy-token", "oppdatering.enabled=false")
+        kontekst.withPropertyValues("slack.token=dummy-token", "oppdatering.enabled=false")
                 .run(kontekst -> {
                     assertThat(kontekst).hasNotFailed().hasSingleBean(Slack.class)
                             .hasSingleBean(SlackSender.class).doesNotHaveBean(TidsstyrteHandlinger.class);
@@ -90,7 +81,7 @@ class SlackKonfigurasjonTest {
 
     @Test
     void lokalprofilOppretterAldriSlackSelvMedTokenOgAktivering() {
-        kontekst.withPropertyValues("slack.enabled=true", "slack.token=dummy-token")
+        kontekst.withPropertyValues("slack.token=dummy-token")
                 .withInitializer(kontekst -> kontekst.getEnvironment().setActiveProfiles("local"))
                 .run(kontekst -> assertThat(kontekst).hasNotFailed().doesNotHaveBean(Slack.class)
                         .doesNotHaveBean(SlackSender.class).doesNotHaveBean(TidsstyrteHandlinger.class)
@@ -100,7 +91,7 @@ class SlackKonfigurasjonTest {
     @ParameterizedTest
     @ValueSource(strings = {"", "https://example.test", "<!channel>", "#kanal\nmed-linjeskift"})
     void avviserUgyldigKanal(final String kanal) {
-        kontekst.withPropertyValues("slack.enabled=true", "slack.token=dummy-token", "slack.channel=" + kanal)
+        kontekst.withPropertyValues("slack.token=dummy-token", "slack.channel=" + kanal)
                 .run(kontekst -> assertThat(kontekst).hasFailed());
     }
 
@@ -109,7 +100,7 @@ class SlackKonfigurasjonTest {
         final WireMockServer stub = new WireMockServer(options().dynamicPort());
         stub.start();
         try (final Slack produksjonsklient = new SlackKonfigurasjon().slack(
-                new SlackInnstillinger(true, "dummy-token", "#testkanal"))) {
+                new SlackInnstillinger("dummy-token", "#testkanal"))) {
             stub.stubFor(post(urlEqualTo("/api/chat.postMessage"))
                     .willReturn(aResponse().withStatus(503).withHeader("Retry-After", "0").withBody("{}")));
             try (final Slack lokalKlient = lokalKlient(produksjonsklient, stub)) {
@@ -128,7 +119,7 @@ class SlackKonfigurasjonTest {
         final WireMockServer stub = new WireMockServer(options().dynamicPort());
         stub.start();
         try (final Slack produksjonsklient = new SlackKonfigurasjon().slack(
-                new SlackInnstillinger(true, "dummy-token", "#testkanal"))) {
+                new SlackInnstillinger("dummy-token", "#testkanal"))) {
             stub.stubFor(post(urlEqualTo("/api/chat.postMessage"))
                     .willReturn(aResponse().withFault(Fault.EMPTY_RESPONSE)));
             try (final Slack lokalKlient = lokalKlient(produksjonsklient, stub)) {

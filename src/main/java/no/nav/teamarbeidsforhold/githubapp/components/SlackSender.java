@@ -28,7 +28,6 @@ import java.util.regex.Pattern;
 @Slf4j
 @Component
 @Profile("!local")
-@ConditionalOnProperty(prefix = "slack", name = "enabled", havingValue = "true")
 @RequiredArgsConstructor
 public class SlackSender {
     private static final Pattern CVE_ID = Pattern.compile("CVE-[0-9]{4}-[0-9]{4,}");

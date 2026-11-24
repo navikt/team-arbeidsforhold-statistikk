@@ -50,7 +50,7 @@ class SlackSenderTest {
     private final ListAppender<ILoggingEvent> logger = new ListAppender<>();
     private final Logger senderLogger = (Logger) LoggerFactory.getLogger(SlackSender.class);
     private final SlackSender sender = new SlackSender(
-            new SlackInnstillinger(true, HEMMELIGHET, "#testkanal"), slackMethods, repository, klokke);
+            new SlackInnstillinger(HEMMELIGHET, "#testkanal"), slackMethods, repository, klokke);
 
     @BeforeEach
     void oppsett() throws Exception {

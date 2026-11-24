@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 
 @Configuration
 @Profile("!local")
-@ConditionalOnProperty(prefix = "slack", name = "enabled", havingValue = "true")
 public class SlackKonfigurasjon {
     private static final Pattern KANAL = Pattern.compile("(?:[CG][A-Z0-9]+|#[\\p{L}0-9_-]+)");
 
@@ -31,7 +30,7 @@ public class SlackKonfigurasjon {
         if (innstillinger.token() == null || innstillinger.token().isBlank()
                 || innstillinger.token().chars().anyMatch(tegn -> tegn <= 32 || tegn >= 127)) {
             throw new IllegalStateException(
-                    "slack.token må være satt og bare inneholde synlige ASCII-tegn når Slack er aktivert");
+                    "slack.token må være satt og bare inneholde synlige ASCII-tegn");
         }
         if (innstillinger.channel() == null || !KANAL.matcher(innstillinger.channel()).matches()) {
             throw new IllegalStateException("slack.channel må være en kanal-ID eller et kanalnavn som starter med #");
