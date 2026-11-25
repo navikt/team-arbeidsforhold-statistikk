@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 @Component
 @Profile("!local")
 public class KopierNaisApiData {
+    private static final Duration MAKSIMAL_VENTETID_FOR_API_RESULTAT = Duration.ofMinutes(5);
+
     private final HttpGraphQlClient naisApi;
     private final DeploymentRepository deploymentRepository;
     private final ManifestParser manifestParser;
@@ -49,7 +51,7 @@ public class KopierNaisApiData {
 
     public CompletableFuture<Void> kopierNaisApiDataTilDatabase() {
         return naisApi.documentName("workloads-med-critical-cve").retrieve("team").toEntity(Team.class)
-                .timeout(Duration.ofMinutes(5))
+                .timeout(MAKSIMAL_VENTETID_FOR_API_RESULTAT)
                 .doOnNext(team -> transactionTemplate.executeWithoutResult(_ -> lagre(team)))
                 .then().toFuture();
     }

@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +20,8 @@ import java.util.concurrent.TimeoutException;
 @Component
 @Profile("!local")
 public class TidsstyrteHandlinger {
+    private static final Duration MAKSIMAL_VENTETID_PER_IMPORT = Duration.ofMinutes(15);
+
     private final LederUtpeker lederUtpeker;
     private final ObjectProvider<SlackSender> slackSender;
     private final KritiskeSårbarheterAnalyse analyse;
@@ -32,9 +35,11 @@ public class TidsstyrteHandlinger {
         }
         try {
             log.info("Starter daglig NVD-import");
-            kopierNvdCveData.kopierNvdCveDataTilDatabase().get(15, TimeUnit.MINUTES);
+            kopierNvdCveData.kopierNvdCveDataTilDatabase()
+                    .get(MAKSIMAL_VENTETID_PER_IMPORT.toMinutes(), TimeUnit.MINUTES);
             log.info("NVD-import fullført; starter import av deployment- og sårbarhetsdata");
-            kopierNaisApiData.kopierNaisApiDataTilDatabase().get(15, TimeUnit.MINUTES);
+            kopierNaisApiData.kopierNaisApiDataTilDatabase()
+                    .get(MAKSIMAL_VENTETID_PER_IMPORT.toMinutes(), TimeUnit.MINUTES);
         } catch (final IOException | ExecutionException | TimeoutException | CancellationException e) {
             final Throwable feil = e instanceof ExecutionException && e.getCause() != null ? e.getCause() : e;
             log.error("Daglig dataoppdatering feilet: {}. Ingen nye Slack-varsler opprettes",

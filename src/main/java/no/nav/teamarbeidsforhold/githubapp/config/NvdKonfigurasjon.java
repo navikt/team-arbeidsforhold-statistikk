@@ -16,6 +16,8 @@ import java.time.Duration;
 public class NvdKonfigurasjon {
     public static final String NVD_ADRESSE = "https://nvd.nist.gov/feeds/json/cve/2.0/";
     public static final String FILNAVN = "nvdcve-2.0-recent";
+    private static final Duration TILKOBLINGSTIDSAVBRUDD = Duration.ofSeconds(10);
+    private static final Duration RESPONSTIDSAVBRUDD = Duration.ofMinutes(2);
 
     @Bean
     @NvdApi
@@ -23,8 +25,8 @@ public class NvdKonfigurasjon {
         return builder
                 .baseUrl(NVD_ADRESSE)
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.create().compress(true)
-                        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10_000)
-                        .responseTimeout(Duration.ofMinutes(2))))
+                        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Math.toIntExact(TILKOBLINGSTIDSAVBRUDD.toMillis()))
+                        .responseTimeout(RESPONSTIDSAVBRUDD)))
                 .codecs(konfigurator -> konfigurator.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
                 .build();
     }

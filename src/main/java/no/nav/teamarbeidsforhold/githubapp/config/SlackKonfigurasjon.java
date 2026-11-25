@@ -24,6 +24,10 @@ import java.util.regex.Pattern;
 @Profile("!local")
 public class SlackKonfigurasjon {
     private static final Pattern KANAL = Pattern.compile("(?:[CG][A-Z0-9]+|#[\\p{L}0-9_-]+)");
+    private static final Duration TILKOBLINGSTIDSAVBRUDD = Duration.ofSeconds(10);
+    private static final Duration LESETIDSAVBRUDD = Duration.ofSeconds(20);
+    private static final Duration SKRIVETIDSAVBRUDD = Duration.ofSeconds(20);
+    private static final Duration MAKSIMAL_KALLTID = Duration.ofSeconds(30);
 
     @Bean(destroyMethod = "close")
     Slack slack(final SlackInnstillinger innstillinger) {
@@ -44,10 +48,10 @@ public class SlackKonfigurasjon {
                 .followRedirects(false)
                 .followSslRedirects(false)
                 .connectionSpecs(List.of(ConnectionSpec.MODERN_TLS))
-                .connectTimeout(Duration.ofSeconds(10))
-                .readTimeout(Duration.ofSeconds(20))
-                .writeTimeout(Duration.ofSeconds(20))
-                .callTimeout(Duration.ofSeconds(30))
+                .connectTimeout(TILKOBLINGSTIDSAVBRUDD)
+                .readTimeout(LESETIDSAVBRUDD)
+                .writeTimeout(SKRIVETIDSAVBRUDD)
+                .callTimeout(MAKSIMAL_KALLTID)
                 .addInterceptor(kjede -> kjede.proceed(kjede.request().newBuilder()
                         .method(kjede.request().method(), utenGjentakelse(kjede.request().body())).build()))
                 .build();

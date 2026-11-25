@@ -36,6 +36,8 @@ import java.util.zip.GZIPInputStream;
 @Component
 @Profile("!local")
 public class KopierNvdCveData {
+    private static final Duration MAKSIMAL_VENTETID_PER_NEDLASTING = Duration.ofMinutes(5);
+
     public static final DateTimeFormatter FORMATTER =
             new DateTimeFormatterBuilder()
                     .parseCaseInsensitive()
@@ -82,7 +84,7 @@ public class KopierNvdCveData {
                 .uri(NvdKonfigurasjon.FILNAVN + ".json.gz")
                 .retrieve()
                 .bodyToMono(byte[].class)
-                .block(Duration.ofMinutes(5));
+                .block(MAKSIMAL_VENTETID_PER_NEDLASTING);
         try (GZIPInputStream gzip = new GZIPInputStream(new ByteArrayInputStream(Objects.requireNonNull(bytes)))) {
             final JsonNode root = new ObjectMapper().readTree(gzip);
             final JsonNode sårbarheter = root.required("vulnerabilities");
@@ -148,7 +150,7 @@ public class KopierNvdCveData {
     private Optional<CveNvdMeta> hentNyeMetadata() throws IOException {
         final String sisteHash = cveNvdMetaRepository.findTopByOrderByTimestampDesc().map(CveNvdMeta::getSha256).orElse("noe som ikke matcher noen sha256");
         final String serverMeta = webClient.get().uri(NvdKonfigurasjon.FILNAVN + ".meta").retrieve()
-                .bodyToMono(String.class).block(Duration.ofMinutes(5));
+                .bodyToMono(String.class).block(MAKSIMAL_VENTETID_PER_NEDLASTING);
         final Properties serverproperties = new Properties();
         serverproperties.load(new StringReader(Objects.requireNonNull(serverMeta)));
         final String serverHash = serverproperties.getProperty("sha256");

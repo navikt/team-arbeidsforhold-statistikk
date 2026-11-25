@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 public class SlackSender {
     private static final Pattern CVE_ID = Pattern.compile("CVE-[0-9]{4}-[0-9]{4,}");
     private static final String AVSENDER = "slack-bot";
+    private static final Duration VENTETID_FØR_NYTT_FORSØK = Duration.ofMinutes(30);
     private static final Set<String> SIKRE_AVVISNINGER = Set.of(
             "channel_not_found", "not_in_channel", "is_archived", "invalid_auth", "not_authed",
             "token_revoked", "account_inactive", "missing_scope", "msg_too_long", "no_text",
@@ -81,7 +82,7 @@ public class SlackSender {
                 } else if (svar != null && svar.getError() != null && SIKRE_AVVISNINGER.contains(svar.getError())) {
                     meterRegistry.counter("slack.varsler", "utfall", "sikker_avvisning").increment();
                     log.warn("Slack avviste varsel for {}: {}", id.getVulnerabilityId(), svar.getError());
-                    nesteForsøk = klokke.instant().plus(Duration.ofMinutes(30));
+                    nesteForsøk = klokke.instant().plus(VENTETID_FØR_NYTT_FORSØK);
                     frigiReservasjon(id, forsøkstid);
                     return;
                 } else {
@@ -138,10 +139,10 @@ public class SlackSender {
                 }
             } catch (final NumberFormatException e) {
                 log.warn("Slack returnerte ugyldig Retry-After; venter 30 minutter");
-                return klokke.instant().plus(Duration.ofMinutes(30));
+                return klokke.instant().plus(VENTETID_FØR_NYTT_FORSØK);
             }
         }
         log.warn("Slack manglet gyldig Retry-After; venter 30 minutter");
-        return klokke.instant().plus(Duration.ofMinutes(30));
+        return klokke.instant().plus(VENTETID_FØR_NYTT_FORSØK);
     }
 }
