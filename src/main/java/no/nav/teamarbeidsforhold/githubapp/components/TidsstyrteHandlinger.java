@@ -18,7 +18,6 @@ import java.util.concurrent.TimeoutException;
 @RequiredArgsConstructor
 @Component
 @Profile("!local")
-@ConditionalOnProperty(prefix = "oppdatering", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class TidsstyrteHandlinger {
     private final LederUtpeker lederUtpeker;
     private final ObjectProvider<SlackSender> slackSender;

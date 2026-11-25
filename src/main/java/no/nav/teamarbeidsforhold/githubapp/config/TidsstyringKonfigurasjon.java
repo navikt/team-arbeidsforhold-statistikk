@@ -7,7 +7,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration(proxyBeanMethods = false)
 @Profile("!local")
-@ConditionalOnProperty(prefix = "oppdatering", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableScheduling
 public final class TidsstyringKonfigurasjon {
 }

@@ -72,17 +72,6 @@ class SlackKonfigurasjonTest {
     }
 
     @Test
-    void deaktivertOppdateringFjernerPlanleggingSelvOmSlackErAktivert() {
-        kontekst.withPropertyValues("slack.token=dummy-token", "oppdatering.enabled=false")
-                .run(kontekst -> {
-                    assertThat(kontekst).hasNotFailed().hasSingleBean(Slack.class)
-                            .hasSingleBean(SlackSender.class).doesNotHaveBean(TidsstyrteHandlinger.class);
-                    assertThat(kontekst)
-                            .doesNotHaveBean(TaskManagementConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME);
-                });
-    }
-
-    @Test
     void lokalprofilOppretterAldriSlackSelvMedTokenOgAktivering() {
         kontekst.withPropertyValues("slack.token=dummy-token")
                 .withInitializer(kontekst -> kontekst.getEnvironment().setActiveProfiles("local"))
