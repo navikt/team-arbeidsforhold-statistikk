@@ -8,14 +8,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
-
 @Getter
 @Setter
 @EqualsAndHashCode
 @Embeddable
-public class PomId implements Serializable {
-    private static final long serialVersionUID = -335171151987863445L;
+public class PomId {
     @Size(max = 250)
     @NotNull
     @Column(name = "repo_full_name", nullable = false, length = 250)
@@ -25,6 +22,4 @@ public class PomId implements Serializable {
     @NotNull
     @Column(name = "path_in_repo", nullable = false, length = 250)
     private String pathInRepo;
-
-
 }

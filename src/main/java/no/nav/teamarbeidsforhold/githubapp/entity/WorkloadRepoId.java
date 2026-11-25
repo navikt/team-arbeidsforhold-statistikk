@@ -8,14 +8,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
-
 @Getter
 @Setter
 @EqualsAndHashCode
 @Embeddable
-public class WorkloadRepoId implements Serializable {
-    private static final long serialVersionUID = -6035069189779838080L;
+public class WorkloadRepoId {
     @Size(max = 250)
     @NotNull
     @Column(name = "WORKLOAD_NAME", nullable = false, length = 250)
