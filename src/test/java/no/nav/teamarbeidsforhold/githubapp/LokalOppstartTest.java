@@ -65,7 +65,7 @@ class LokalOppstartTest {
     }
 
     @Test
-    void viserEksempeldataUtenInnlogging() throws Exception {
+    void viser_eksempeldata_uten_innlogging() throws Exception {
         mvc.perform(get("/")).andExpect(status().isOk()).andExpect(forwardedUrl("index.html"));
         mvc.perform(get("/index.html")).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html"));
@@ -84,7 +84,7 @@ class LokalOppstartTest {
     }
 
     @Test
-    void oppretterIkkeEksterneIntegrasjonerEllerAdmin() {
+    void oppretter_ikke_eksterne_integrasjoner_eller_admin() {
         for (final Class<?> type : List.of(GitHub.class, GithubOppdateringsKø.class,
                 KopierNaisApiData.class, KopierNvdCveData.class, LederUtpekerServerSideEventHåndterer.class,
                 AdminController.class, RepoController.class, JwtDecoder.class,
@@ -96,7 +96,7 @@ class LokalOppstartTest {
     }
 
     @Test
-    void avviserAdminOgsåMedGyldigCsrfToken() throws Exception {
+    void avviser_admin_også_med_gyldig_csrf_token() throws Exception {
         final MockHttpSession session = new MockHttpSession();
         final MvcResult resultat = mvc.perform(get("/api/me").session(session)).andExpect(status().isOk()).andReturn();
         final CsrfToken token = (CsrfToken) resultat.getRequest().getAttribute(CsrfToken.class.getName());
@@ -109,7 +109,7 @@ class LokalOppstartTest {
     }
 
     @Test
-    void gjentattInnlastingBeholderEgneEksempler() throws Exception {
+    void gjentatt_innlasting_beholder_egne_eksempler() throws Exception {
         jdbc.update("INSERT INTO repo (full_name, clone_url) VALUES (?, ?)",
                 "egne/egen-side", "https://github.com/egne/egen-side.git");
         jdbc.update("UPDATE repo SET clone_url = ? WHERE full_name = ?",

@@ -68,7 +68,7 @@ class KopierNvdCveDataTest {
 
     @ParameterizedTest
     @CsvSource({"cvssMetricV40, 4.0", "cvssMetricV31, 3.1", "cvssMetricV30, 3.0"})
-    void lagrerAlvorlighetsgradFraCvssDataFørMetadata(final String felt, final String versjon) throws Exception {
+    void lagrer_alvorlighetsgrad_fra_cvss_data_før_metadata(final String felt, final String versjon) throws Exception {
         feed = gzip(feed(felt, versjon, ""));
 
         assertThat(importør.kopierNvdCveDataTilDatabase().get()).isTrue();
@@ -89,7 +89,7 @@ class KopierNvdCveDataTest {
     }
 
     @Test
-    void velgerPrimærvurderingenNårFlereKilderFinnes() throws Exception {
+    void velger_primærvurderingen_når_flere_kilder_finnes() throws Exception {
         feed = gzip(feed("cvssMetricV40", "4.0", """
                 {"type":"Secondary","cvssData":{"version":"4.0","baseScore":7.0,"baseSeverity":"HIGH"}},
                 """));
@@ -101,7 +101,7 @@ class KopierNvdCveDataTest {
     }
 
     @Test
-    void uendretFeedLasterIkkeDataPåNytt() throws Exception {
+    void uendret_feed_laster_ikke_data_på_nytt() throws Exception {
         assertThat(importør.kopierNvdCveDataTilDatabase().get()).isTrue();
         assertThat(importør.kopierNvdCveDataTilDatabase().get()).isFalse();
 
@@ -111,7 +111,7 @@ class KopierNvdCveDataTest {
     }
 
     @Test
-    void mislykketLagringBeholderGammelHashSlikAtNesteImportPrøverIgjen() throws Exception {
+    void mislykket_lagring_beholder_gammel_hash_slik_at_neste_import_prøver_igjen() throws Exception {
         doThrow(new IllegalStateException("Testfeil")).doNothing().when(vulnerabilityService).lagreNvdData(anyList());
 
         assertThrows(IllegalStateException.class, () -> importør.kopierNvdCveDataTilDatabase());
@@ -123,7 +123,7 @@ class KopierNvdCveDataTest {
     }
 
     @Test
-    void ugyldigGzipLagrerIkkeHash() {
+    void ugyldig_gzip_lagrer_ikke_hash() {
         feed = "ikke gzip".getBytes(StandardCharsets.UTF_8);
 
         assertThrows(IOException.class, () -> importør.kopierNvdCveDataTilDatabase());
@@ -133,7 +133,7 @@ class KopierNvdCveDataTest {
     }
 
     @Test
-    void ugyldigFeedstrukturLagrerIkkeHash() throws IOException {
+    void ugyldig_feedstruktur_lagrer_ikke_hash() throws IOException {
         feed = gzip("{\"vulnerabilities\":{}}");
 
         assertThrows(IOException.class, () -> importør.kopierNvdCveDataTilDatabase());
@@ -143,7 +143,7 @@ class KopierNvdCveDataTest {
     }
 
     @Test
-    void ugyldigeMetadataAvvisesFørNedlasting() {
+    void ugyldige_metadata_avvises_før_nedlasting() {
         metadata = "sha256=ikke-en-hash";
 
         assertThrows(IOException.class, () -> importør.kopierNvdCveDataTilDatabase());

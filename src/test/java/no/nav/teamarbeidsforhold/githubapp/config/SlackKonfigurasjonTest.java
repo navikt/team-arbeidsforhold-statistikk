@@ -51,7 +51,7 @@ class SlackKonfigurasjonTest {
             .withBean(KopierNaisApiData.class, () -> mock(KopierNaisApiData.class));
 
     @Test
-    void utenTokenStopperOppstartUtenÅLekkeKonfigurasjon() {
+    void uten_token_stopper_oppstart_uten_å_lekke_konfigurasjon() {
         kontekst.run(kontekst -> {
             assertThat(kontekst).hasFailed();
             assertThat(kontekst.getStartupFailure()).hasRootCauseMessage(
@@ -60,7 +60,7 @@ class SlackKonfigurasjonTest {
     }
 
     @Test
-    void binderStandardkanalOgOppretterPlanlegging() {
+    void binder_standardkanal_og_oppretter_planlegging() {
         kontekst.withPropertyValues("slack.token=dummy-token").run(kontekst -> {
             assertThat(kontekst).hasNotFailed().hasSingleBean(SlackSender.class)
                     .hasSingleBean(TidsstyrteHandlinger.class);
@@ -72,7 +72,18 @@ class SlackKonfigurasjonTest {
     }
 
     @Test
-    void lokalprofilOppretterAldriSlackSelvMedTokenOgAktivering() {
+    void deaktivert_oppdatering_fjerner_planlegging_selv_om_slack_er_aktivert() {
+        kontekst.withPropertyValues("slack.token=dummy-token", "oppdatering.enabled=false")
+                .run(kontekst -> {
+                    assertThat(kontekst).hasNotFailed().hasSingleBean(Slack.class)
+                            .hasSingleBean(SlackSender.class).doesNotHaveBean(TidsstyrteHandlinger.class);
+                    assertThat(kontekst)
+                            .doesNotHaveBean(TaskManagementConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME);
+                });
+    }
+
+    @Test
+    void lokalprofil_oppretter_aldri_slack_selv_med_token_og_aktivering() {
         kontekst.withPropertyValues("slack.token=dummy-token")
                 .withInitializer(kontekst -> kontekst.getEnvironment().setActiveProfiles("local"))
                 .run(kontekst -> assertThat(kontekst).hasNotFailed().doesNotHaveBean(Slack.class)
@@ -82,13 +93,13 @@ class SlackKonfigurasjonTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"", "https://example.test", "<!channel>", "#kanal\nmed-linjeskift"})
-    void avviserUgyldigKanal(final String kanal) {
+    void avviser_ugyldig_kanal(final String kanal) {
         kontekst.withPropertyValues("slack.token=dummy-token", "slack.channel=" + kanal)
                 .run(kontekst -> assertThat(kontekst).hasFailed());
     }
 
     @Test
-    void http503MedRetryAfterNullSkalIkkeGiSkjultGjentakelse() throws Exception {
+    void http503_med_retry_after_null_skal_ikke_gi_skjult_gjentakelse() throws Exception {
         final WireMockServer stub = new WireMockServer(options().dynamicPort());
         stub.start();
         try (final Slack produksjonsklient = new SlackKonfigurasjon().slack(
@@ -107,7 +118,7 @@ class SlackKonfigurasjonTest {
     }
 
     @Test
-    void bruttForbindelseSkalGiEttHttpKall() throws Exception {
+    void brutt_forbindelse_skal_gi_ett_http_kall() throws Exception {
         final WireMockServer stub = new WireMockServer(options().dynamicPort());
         stub.start();
         try (final Slack produksjonsklient = new SlackKonfigurasjon().slack(

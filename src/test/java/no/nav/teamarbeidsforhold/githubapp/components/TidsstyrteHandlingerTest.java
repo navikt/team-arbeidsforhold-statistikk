@@ -27,14 +27,14 @@ class TidsstyrteHandlingerTest {
             new TidsstyrteHandlinger(lederUtpeker, slackSenderProvider, analyse, nvd, deployment);
 
     @Test
-    void ikkeLederSkalIkkeKalleEksterneIntegrasjoner() {
+    void ikke_leder_skal_ikke_kalle_eksterne_integrasjoner() {
         meldinger.oppdaterSårbarheterMedVarsel();
 
         verifyNoInteractions(nvd, deployment, analyse, slackSenderProvider, slackSender);
     }
 
     @Test
-    void lederOppdatererDataOgAnalysererUtenSending() throws IOException {
+    void leder_oppdaterer_data_og_analyserer_uten_sending() throws IOException {
         when(lederUtpeker.erLeder()).thenReturn(true);
         when(slackSenderProvider.getIfAvailable()).thenReturn(slackSender);
         fullførImporter(true);
@@ -49,7 +49,7 @@ class TidsstyrteHandlingerTest {
     }
 
     @Test
-    void uendretNvdDataForhindrerIkkeAndreOppdateringerEllerAnalyse() throws IOException {
+    void uendret_nvd_data_forhindrer_ikke_andre_oppdateringer_eller_analyse() throws IOException {
         when(lederUtpeker.erLeder()).thenReturn(true);
         when(slackSenderProvider.getIfAvailable()).thenReturn(slackSender);
         fullførImporter(false);
@@ -62,7 +62,7 @@ class TidsstyrteHandlingerTest {
     }
 
     @Test
-    void manglendeSlackSenderForhindrerIkkeImportene() throws IOException {
+    void manglende_slack_sender_forhindrer_ikke_importene() throws IOException {
         when(lederUtpeker.erLeder()).thenReturn(true);
         when(slackSenderProvider.getIfAvailable()).thenReturn(null);
         fullførImporter(true);
@@ -75,7 +75,7 @@ class TidsstyrteHandlingerTest {
     }
 
     @Test
-    void feilVedNvdImportForhindrerEtterfølgendeImportOgSlack() throws IOException {
+    void feil_ved_nvd_import_forhindrer_etterfølgende_import_og_slack() throws IOException {
         when(lederUtpeker.erLeder()).thenReturn(true);
         when(nvd.kopierNvdCveDataTilDatabase())
                 .thenReturn(CompletableFuture.failedFuture(new IOException("feil")));
@@ -86,7 +86,7 @@ class TidsstyrteHandlingerTest {
     }
 
     @Test
-    void feilVedDeploymentImportForhindrerSlack() throws IOException {
+    void feil_ved_deployment_import_forhindrer_slack() throws IOException {
         when(lederUtpeker.erLeder()).thenReturn(true);
         when(nvd.kopierNvdCveDataTilDatabase()).thenReturn(CompletableFuture.completedFuture(true));
         when(deployment.kopierNaisApiDataTilDatabase())
@@ -98,7 +98,7 @@ class TidsstyrteHandlingerTest {
     }
 
     @Test
-    void venterMedTidsavbruddPåBeggeImportene()
+    void venter_med_tidsavbrudd_på_begge_importene()
             throws IOException, ExecutionException, InterruptedException, TimeoutException {
         when(lederUtpeker.erLeder()).thenReturn(true);
         when(slackSenderProvider.getIfAvailable()).thenReturn(slackSender);
@@ -119,7 +119,7 @@ class TidsstyrteHandlingerTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void tidsavbruddVedEnAvImporteneForhindrerSlack(final boolean nvdTimeout)
+    void tidsavbrudd_ved_en_av_importene_forhindrer_slack(final boolean nvdTimeout)
             throws IOException, ExecutionException, InterruptedException, TimeoutException {
         when(lederUtpeker.erLeder()).thenReturn(true);
         final CompletableFuture<Boolean> nvdResultat = mock();
@@ -142,7 +142,7 @@ class TidsstyrteHandlingerTest {
     }
 
     @Test
-    void avbruttVentningBevarerAvbruddsflagget()
+    void avbrutt_ventning_bevarer_avbruddsflagget()
             throws IOException, ExecutionException, InterruptedException, TimeoutException {
         when(lederUtpeker.erLeder()).thenReturn(true);
         final CompletableFuture<Boolean> nvdResultat = mock();
@@ -160,7 +160,7 @@ class TidsstyrteHandlingerTest {
     }
 
     @Test
-    void dagligKjøringErPlanlagtKlokkenFemIOslo() throws NoSuchMethodException {
+    void daglig_kjøring_er_planlagt_klokken_fem_i_oslo() throws NoSuchMethodException {
         final Scheduled plan = TidsstyrteHandlinger.class
                 .getMethod("oppdaterSårbarheterMedVarsel")
                 .getAnnotation(Scheduled.class);
@@ -171,7 +171,7 @@ class TidsstyrteHandlingerTest {
     }
 
     @Test
-    void lederSenderVentendeVarslerUtenImportEllerAnalyse() {
+    void leder_sender_ventende_varsler_uten_import_eller_analyse() {
         when(lederUtpeker.erLeder()).thenReturn(true);
         when(slackSenderProvider.getIfAvailable()).thenReturn(slackSender);
 
@@ -182,14 +182,14 @@ class TidsstyrteHandlingerTest {
     }
 
     @Test
-    void ikkeLederSenderIkkeVentendeVarsler() {
+    void ikke_leder_sender_ikke_ventende_varsler() {
         meldinger.sendVentendeSlackVarsler();
 
         verifyNoInteractions(slackSenderProvider, slackSender, nvd, deployment, analyse);
     }
 
     @Test
-    void manglendeSlackSenderSenderIkkeVentendeVarsler() {
+    void manglende_slack_sender_sender_ikke_ventende_varsler() {
         when(lederUtpeker.erLeder()).thenReturn(true);
         when(slackSenderProvider.getIfAvailable()).thenReturn(null);
 
@@ -200,7 +200,7 @@ class TidsstyrteHandlingerTest {
     }
 
     @Test
-    void ventendeVarslerPlanleggesMedEttMinuttsForsinkelse() throws NoSuchMethodException {
+    void ventende_varsler_planlegges_med_ett_minutts_forsinkelse() throws NoSuchMethodException {
         final Scheduled plan = TidsstyrteHandlinger.class
                 .getMethod("sendVentendeSlackVarsler")
                 .getAnnotation(Scheduled.class);

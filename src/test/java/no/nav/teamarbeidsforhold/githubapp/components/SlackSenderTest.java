@@ -74,7 +74,7 @@ class SlackSenderTest {
     }
 
     @Test
-    void reservererFørSendingOgSenderIkkeSammeVarselIgjen() throws Exception {
+    void reserverer_før_sending_og_sender_ikke_samme_varsel_igjen() throws Exception {
         sender.sendKritiskSårbarhetsMeldinger();
         sender.sendKritiskSårbarhetsMeldinger();
 
@@ -96,7 +96,7 @@ class SlackSenderTest {
     }
 
     @Test
-    void usikkertTransportutfallLoggesUtenDetaljerOgForblirRegistrert() throws Exception {
+    void usikkert_transportutfall_logges_uten_detaljer_og_forblir_registrert() throws Exception {
         when(slackMethods.chatPostMessage(any(ChatPostMessageRequest.class))).thenThrow(new IOException(HEMMELIGHET));
 
         sender.sendKritiskSårbarhetsMeldinger();
@@ -109,7 +109,7 @@ class SlackSenderTest {
     }
 
     @Test
-    void ugyldigJsonBehandlesSomUsikkerLevering() throws Exception {
+    void ugyldig_json_behandles_som_usikker_levering() throws Exception {
         when(slackMethods.chatPostMessage(any(ChatPostMessageRequest.class))).thenThrow(new JsonSyntaxException(HEMMELIGHET));
 
         assertDoesNotThrow(sender::sendKritiskSårbarhetsMeldinger);
@@ -120,7 +120,7 @@ class SlackSenderTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void senderBareEttVarselPerKjøringOgsåVedUkjentSvar(final boolean bekreftet) throws Exception {
+    void sender_bare_ett_varsel_per_kjøring_også_ved_ukjent_svar(final boolean bekreftet) throws Exception {
         final CriticalVulnerabilityNoticeId nesteId = new CriticalVulnerabilityNoticeId();
         nesteId.setVulnerabilityId("CVE-2026-54321");
         nesteId.setChannel("slack");
@@ -148,7 +148,7 @@ class SlackSenderTest {
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {"internal_error", HEMMELIGHET})
-    void ukjenteSlackFeilFrigirIkkeReservasjonen(final String feilkode) throws Exception {
+    void ukjente_slack_feil_frigir_ikke_reservasjonen(final String feilkode) throws Exception {
         when(slackMethods.chatPostMessage(any(ChatPostMessageRequest.class))).thenReturn(svar(false, feilkode));
 
         sender.sendKritiskSårbarhetsMeldinger();
@@ -159,7 +159,7 @@ class SlackSenderTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"not_in_channel", "invalid_auth", "ratelimited"})
-    void sikkerAvvisningKanPrøvesIgjenEtterTrettiMinutter(final String feilkode) throws Exception {
+    void sikker_avvisning_kan_prøves_igjen_etter_tretti_minutter(final String feilkode) throws Exception {
         when(repository.reserveForSending(eq(id), any(), eq("slack-bot"))).thenReturn(1);
         when(slackMethods.chatPostMessage(any(ChatPostMessageRequest.class)))
                 .thenReturn(svar(false, feilkode), svar(true, null));
@@ -177,7 +177,7 @@ class SlackSenderTest {
     }
 
     @Test
-    void ratebegrensningStopperHeleKjøringenOgRespektererRetryAfter() throws Exception {
+    void ratebegrensning_stopper_hele_kjøringen_og_respekterer_retry_after() throws Exception {
         final CriticalVulnerabilityNoticeId nesteId = new CriticalVulnerabilityNoticeId();
         nesteId.setVulnerabilityId("CVE-2026-54321");
         nesteId.setChannel("slack");
@@ -202,7 +202,7 @@ class SlackSenderTest {
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {"ugyldig", "0", "-1"})
-    void ugyldigRetryAfterLoggesOgGirTrettiMinuttersPause(final String retryAfter) throws Exception {
+    void ugyldig_retry_after_logges_og_gir_tretti_minutters_pause(final String retryAfter) throws Exception {
         when(repository.reserveForSending(eq(id), any(), eq("slack-bot"))).thenReturn(1);
         when(slackMethods.chatPostMessage(any(ChatPostMessageRequest.class)))
                 .thenThrow(httpFeil(429, retryAfter)).thenReturn(svar(true, null));
@@ -218,7 +218,7 @@ class SlackSenderTest {
     }
 
     @Test
-    void serverfeilForblirAntattSendt() throws Exception {
+    void serverfeil_forblir_antatt_sendt() throws Exception {
         when(slackMethods.chatPostMessage(any(ChatPostMessageRequest.class))).thenThrow(httpFeil(503, null));
 
         sender.sendKritiskSårbarhetsMeldinger();
@@ -228,7 +228,7 @@ class SlackSenderTest {
     }
 
     @Test
-    void databasefeilFørSendingHindrerSlackKall() {
+    void databasefeil_før_sending_hindrer_slack_kall() {
         when(repository.reserveForSending(eq(id), any(), any()))
                 .thenThrow(new DataAccessResourceFailureException(HEMMELIGHET));
 
@@ -239,7 +239,7 @@ class SlackSenderTest {
     }
 
     @Test
-    void databasefeilVedFrigivelseBeholderAntattSendingOgLogges() throws Exception {
+    void databasefeil_ved_frigivelse_beholder_antatt_sending_og_logges() throws Exception {
         when(slackMethods.chatPostMessage(any(ChatPostMessageRequest.class))).thenReturn(svar(false, "invalid_auth"));
         when(repository.releaseForRetry(eq(id), any(), any()))
                 .thenThrow(new DataAccessResourceFailureException(HEMMELIGHET));
@@ -250,7 +250,7 @@ class SlackSenderTest {
     }
 
     @Test
-    void validererCveIdUtenÅLoggeUgyldigInnhold() {
+    void validerer_cve_id_uten_å_logge_ugyldig_innhold() {
         id.setVulnerabilityId("<!channel>" + HEMMELIGHET);
 
         sender.sendKritiskSårbarhetsMeldinger();

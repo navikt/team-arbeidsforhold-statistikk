@@ -47,7 +47,7 @@ class KopierNaisApiDataTest {
     private DeploymentVulnerabilityRepository deploymentVulnerabilityRepository;
 
     @Test
-    void testKopieringTilDatabase() {
+    void test_kopiering_til_database() {
         final GraphQlClient.RequestSpec mockRequestSpec = Mockito.mock(GraphQlClient.RequestSpec.class);
         final GraphQlClient.RetrieveSpec mockRetrieveSpec = Mockito.mock(GraphQlClient.RetrieveSpec.class);
         when(graphql.document(any())).thenReturn(mockRequestSpec);
@@ -78,7 +78,7 @@ class KopierNaisApiDataTest {
     }
 
     @Test
-    void fjernerRettedeSårbarheterBareFraOppdatertDeployment() {
+    void fjerner_rettede_sårbarheter_bare_fra_oppdatert_deployment() {
         final Vulnerability rettet = new Vulnerability("CVE-RETTET", null);
         final Vulnerability beholdt = new Vulnerability("CVE-BEHOLDT", null);
         final Vulnerability ny = new Vulnerability("CVE-NY", null);
@@ -108,7 +108,7 @@ class KopierNaisApiDataTest {
     }
 
     @Test
-    void fjernerAlleSårbarheterNårNaisReturnererTomListe() {
+    void fjerner_alle_sårbarheter_når_nais_returnerer_tom_liste() {
         final GraphQlClient.RetrieveSpec svar = mockNaisSvar();
         when(svar.toEntity(Team.class)).thenReturn(Mono.just(new Team(new PaginatedWorkloads(List.of(
                 workload("app", "", "prod-gcp", List.of(new Vulnerability("CVE-RETTET", null))))))));
@@ -126,7 +126,7 @@ class KopierNaisApiDataTest {
     }
 
     @Test
-    void fjernerSårbarheterSomHarBlittUndertrykt() {
+    void fjerner_sårbarheter_som_har_blitt_undertrykt() {
         final GraphQlClient.RetrieveSpec svar = mockNaisSvar();
         when(svar.toEntity(Team.class)).thenReturn(Mono.just(new Team(new PaginatedWorkloads(List.of(
                 workload("app", "", "prod-gcp", List.of(new Vulnerability("CVE-UNDERTRYKT", null))))))));
@@ -142,7 +142,7 @@ class KopierNaisApiDataTest {
     }
 
     @Test
-    void beholderSårbarheterNårHentingFraNaisFeiler() {
+    void beholder_sårbarheter_når_henting_fra_nais_feiler() {
         final GraphQlClient.RetrieveSpec svar = mockNaisSvar();
         when(svar.toEntity(Team.class)).thenReturn(Mono.just(new Team(new PaginatedWorkloads(List.of(
                 workload("app", "", "prod-gcp", List.of(new Vulnerability("CVE-BEHOLDT", null))))))));

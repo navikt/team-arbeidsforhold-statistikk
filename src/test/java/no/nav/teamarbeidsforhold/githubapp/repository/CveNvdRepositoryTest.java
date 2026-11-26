@@ -24,7 +24,7 @@ class CveNvdRepositoryTest {
     private CveNvdRepository repository;
 
     @Test
-    void findWithoutNotice() {
+    void find_without_notice() {
         final Vulnerability vulnerability1 = em.persist(createVulnerability("CVE-1"));
         final Vulnerability vulnerability2 = em.persist(createVulnerability("CVE-2"));
         em.persist(createCritical(vulnerability1));

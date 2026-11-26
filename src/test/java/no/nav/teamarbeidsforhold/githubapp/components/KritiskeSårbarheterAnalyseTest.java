@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 
 class KritiskeSårbarheterAnalyseTest {
     @Test
-    void oppretterNyeVarslerUtenÅOverskriveEksisterende() {
+    void oppretter_nye_varsler_uten_å_overskrive_eksisterende() {
         final Instant nå = Instant.parse("2026-11-24T11:00:00Z");
         final DeploymentVulnerabilityRepository repository = mock(DeploymentVulnerabilityRepository.class);
         final EntityManager entityManager = mock(EntityManager.class);
