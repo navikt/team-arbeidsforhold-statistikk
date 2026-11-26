@@ -54,7 +54,7 @@ public final class KopierNaisApiDataIT {
     KopierNaisApiData kopierNaisApiData;
 
     @Test
-    void testGraphqlKall() throws InterruptedException, ExecutionException {
+    void test_graphql_kall() throws InterruptedException, ExecutionException {
         when(naisToken.get()).thenReturn("test-token");
         final String manifest = """
                 apiVersion: nais.io/v1alpha1

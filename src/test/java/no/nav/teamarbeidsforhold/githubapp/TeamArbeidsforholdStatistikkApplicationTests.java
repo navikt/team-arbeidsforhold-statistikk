@@ -29,6 +29,6 @@ class TeamArbeidsforholdStatistikkApplicationTests {
     KopierNvdCveData kopierNvdCveData;
 
     @Test
-    void contextLoads() {
+    void context_loads() {
     }
 }

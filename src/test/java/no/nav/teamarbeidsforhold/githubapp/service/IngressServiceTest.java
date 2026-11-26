@@ -48,7 +48,7 @@ class IngressServiceTest {
             "/relative/path, UNKNOWN",
             "ikke en URL, UNKNOWN"
     })
-    void gruppererEtterHostIkkeTekstIUrl(final String url, final IngressGroup.ExposureEnum forventet) {
+    void grupperer_etter_host_ikke_tekst_i_url(final String url, final IngressGroup.ExposureEnum forventet) {
         when(repository.findAll()).thenReturn(List.of(deployment("app", "prod-gcp", "", "navikt/repo@sha",
                 "kind: Application\nspec:\n  ingresses:\n    - '" + url + "'\n")));
 
@@ -60,7 +60,7 @@ class IngressServiceTest {
     }
 
     @Test
-    void prioritererÅpneOgUavklarteFørInterneOgBeholderRepoOgMiljøPerIngress() {
+    void prioriterer_åpne_og_uavklarte_før_interne_og_beholder_repo_og_miljø_per_ingress() {
         final String manifest = """
                 kind: Application
                 metadata:
@@ -102,7 +102,7 @@ class IngressServiceTest {
     }
 
     @Test
-    void skillerManglendeManifesterFraApperUtenIngress() {
+    void skiller_manglende_manifester_fra_apper_uten_ingress() {
         when(repository.findAll()).thenReturn(List.of(
                 deployment("mangler", "prod-gcp", "", null, null),
                 deployment("tom", "prod-gcp", "", null, " "),
@@ -120,7 +120,7 @@ class IngressServiceTest {
     @NullAndEmptySource
     @ValueSource(strings = {"null@sha", "ukjent", "https://example.org/navikt/repo@sha",
             "navikt/repo/ekstra@sha", "https://github.com.evil.example/navikt/repo@sha"})
-    void markererManglendeEllerUkjenteRepoer(final String lastCommit) {
+    void markerer_manglende_eller_ukjente_repoer(final String lastCommit) {
         when(repository.findAll()).thenReturn(List.of(deployment("app", "prod-gcp", "", lastCommit,
                 "spec:\n  ingresses:\n    - https://app.nav.no")));
 
@@ -128,7 +128,7 @@ class IngressServiceTest {
     }
 
     @Test
-    void feilerTydeligVedUleseligManifestFremforÅReturnereUfullstendigOversikt() {
+    void feiler_tydelig_ved_uleselig_manifest_fremfor_å_returnere_ufullstendig_oversikt() {
         when(repository.findAll()).thenReturn(List.of(deployment("app", "prod-gcp", "", null,
                 "spec: [ugyldig")));
 

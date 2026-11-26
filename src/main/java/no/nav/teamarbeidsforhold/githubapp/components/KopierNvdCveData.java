@@ -14,10 +14,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.MissingNode;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -34,6 +36,8 @@ import java.util.zip.GZIPInputStream;
 @Component
 @Profile("!local")
 public class KopierNvdCveData {
+    private static final Duration MAKSIMAL_VENTETID_PER_NEDLASTING = Duration.ofMinutes(5);
+
     public static final DateTimeFormatter FORMATTER =
             new DateTimeFormatterBuilder()
                     .parseCaseInsensitive()
@@ -70,7 +74,8 @@ public class KopierNvdCveData {
 
     @Async
     public CompletableFuture<Boolean> kopierNvdCveDataTilDatabase() throws IOException {
-        if (!indikererMetadataNyeDataOgHvisSåLagreMetadata()) {
+        final Optional<CveNvdMeta> nyeMetadata = hentNyeMetadata();
+        if (nyeMetadata.isEmpty()) {
             log.info("Data fra NVD har ikke endret seg, gjør ingen oppdatering");
             return CompletableFuture.completedFuture(false);
         }
@@ -79,11 +84,15 @@ public class KopierNvdCveData {
                 .uri(NvdKonfigurasjon.FILNAVN + ".json.gz")
                 .retrieve()
                 .bodyToMono(byte[].class)
-                .block();
+                .block(MAKSIMAL_VENTETID_PER_NEDLASTING);
         try (GZIPInputStream gzip = new GZIPInputStream(new ByteArrayInputStream(Objects.requireNonNull(bytes)))) {
             final JsonNode root = new ObjectMapper().readTree(gzip);
+            final JsonNode sårbarheter = root.required("vulnerabilities");
+            if (!sårbarheter.isArray()) {
+                throw new IOException("NVD-feeden mangler en liste med sårbarheter");
+            }
             final List<CveNvd> cveNvds = new ArrayList<>();
-            for (JsonNode v : root.path("vulnerabilities")) {
+            for (final JsonNode v : sårbarheter) {
                 final JsonNode cve = v.path("cve");
                 final CveNvd cveNvd = new CveNvd();
                 final String id = cve.required("id").asString();
@@ -93,14 +102,11 @@ public class KopierNvdCveData {
                 cveNvd.setVulnerability(sårbarhet);
                 cveNvd.setPublished(sjekkDatoType(cve.required("published").stringValue()));
                 cveNvd.setLastModified(sjekkDatoType(cve.required("lastModified").stringValue()));
-                final JsonNode cvsser = cve.path("metrics").path("cvssMetricV40");
-                final JsonNode cvss = cvsser.path(0);
-                if (cvsser.size() >= 2) {
-                    log.error("Kan ikke håndtere to forskjellige cvss-verdier, vi må skrive kode for å velge/prioritere");
-                } else if (cvss.isMissingNode()) {
-                    log.warn("Server ga oss ikke cvss for {}", cveNvd.getCveId());
+                final JsonNode cvss = finnCvssData(cve.path("metrics"));
+                if (cvss.isMissingNode()) {
+                    log.warn("NVD ga ingen CVSS-data for {}", cveNvd.getCveId());
                 } else {
-                    cveNvd.setCvssVersion(cvss.path("cvssVersion").asString());
+                    cveNvd.setCvssVersion(cvss.path("version").asString());
                     cveNvd.setVectorString(cvss.path("vectorString").asString());
                     cveNvd.setBaseScore(cvss.path("baseScore").asDecimal(null));
 
@@ -135,23 +141,46 @@ public class KopierNvdCveData {
             }
             vulnerabilityService.lagreNvdData(cveNvds);
         }
+        final CveNvdMeta metadata = nyeMetadata.orElseThrow();
+        metadata.setTimestamp(OffsetDateTime.now());
+        cveNvdMetaRepository.save(metadata);
         return CompletableFuture.completedFuture(true);
     }
 
-    private boolean indikererMetadataNyeDataOgHvisSåLagreMetadata() throws IOException {
+    private Optional<CveNvdMeta> hentNyeMetadata() throws IOException {
         final String sisteHash = cveNvdMetaRepository.findTopByOrderByTimestampDesc().map(CveNvdMeta::getSha256).orElse("noe som ikke matcher noen sha256");
-        final String serverMeta = webClient.get().uri(NvdKonfigurasjon.FILNAVN + ".meta").retrieve().bodyToMono(String.class).block();
+        final String serverMeta = webClient.get().uri(NvdKonfigurasjon.FILNAVN + ".meta").retrieve()
+                .bodyToMono(String.class).block(MAKSIMAL_VENTETID_PER_NEDLASTING);
         final Properties serverproperties = new Properties();
         serverproperties.load(new StringReader(Objects.requireNonNull(serverMeta)));
         final String serverHash = serverproperties.getProperty("sha256");
+        if (serverHash == null || !serverHash.matches("[A-Fa-f0-9]{64}")) {
+            throw new IOException("NVD-metadata mangler gyldig SHA-256");
+        }
         if (sisteHash.equals(serverHash)) {
-            return false;
+            return Optional.empty();
         }
         final CveNvdMeta nyMeta = new CveNvdMeta();
         nyMeta.setSha256(serverHash);
-        nyMeta.setTimestamp(OffsetDateTime.now());
-        cveNvdMetaRepository.save(nyMeta);
-        return true;
+        return Optional.of(nyMeta);
+    }
+
+    private static JsonNode finnCvssData(final JsonNode metrics) {
+        for (final String versjon : List.of("cvssMetricV40", "cvssMetricV31", "cvssMetricV30")) {
+            final JsonNode vurderinger = metrics.path(versjon);
+            JsonNode vurdering = vurderinger.path(0);
+            for (final JsonNode kandidat : vurderinger) {
+                if ("Primary".equals(kandidat.path("type").stringValue())) {
+                    vurdering = kandidat;
+                    break;
+                }
+            }
+            final JsonNode cvssData = vurdering.path("cvssData");
+            if (!cvssData.isMissingNode()) {
+                return cvssData;
+            }
+        }
+        return MissingNode.getInstance();
     }
 
     private Instant sjekkDatoType(final String tekst) {

@@ -12,43 +12,43 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LokalKonfigurasjonTest {
-    private MockEnvironment lokaltMiljo() {
-        final MockEnvironment miljo = new MockEnvironment()
+    private MockEnvironment lokaltMiljø() {
+        final MockEnvironment miljø = new MockEnvironment()
                 .withProperty("server.address", "127.0.0.1")
                 .withProperty("spring.datasource.url", "jdbc:postgresql://127.0.0.1:5432/statistikk")
                 .withProperty("spring.liquibase.url", "jdbc:postgresql://127.0.0.1:5432/statistikk");
-        miljo.setActiveProfiles("local");
-        return miljo;
+        miljø.setActiveProfiles("local");
+        return miljø;
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"127.0.0.1", "localhost", "[::1]"})
-    void tillaterKunLokaleDatabaseadresser(final String host) {
-        final MockEnvironment miljo = lokaltMiljo()
+    void tillater_kun_lokale_databaseadresser(final String host) {
+        final MockEnvironment miljø = lokaltMiljø()
                 .withProperty("spring.datasource.url", "jdbc:postgresql://" + host + ":5433/eksempler")
                 .withProperty("spring.liquibase.url", "jdbc:postgresql://" + host + ":5433/eksempler");
-        assertDoesNotThrow(() -> LokalKonfigurasjon.validerLokaltMiljo(miljo));
+        assertDoesNotThrow(() -> LokalKonfigurasjon.validerLokaltMiljø(miljø));
     }
 
     @Test
-    void avviserKombinerteOgImplisitteProfiler() {
-        final MockEnvironment miljo = lokaltMiljo();
-        miljo.setActiveProfiles("local", "prod");
-        assertThrows(IllegalStateException.class, () -> LokalKonfigurasjon.validerLokaltMiljo(miljo));
-        miljo.setActiveProfiles();
-        miljo.setDefaultProfiles("local");
-        assertThrows(IllegalStateException.class, () -> LokalKonfigurasjon.validerLokaltMiljo(miljo));
+    void avviser_kombinerte_og_implisitte_profiler() {
+        final MockEnvironment miljø = lokaltMiljø();
+        miljø.setActiveProfiles("local", "prod");
+        assertThrows(IllegalStateException.class, () -> LokalKonfigurasjon.validerLokaltMiljø(miljø));
+        miljø.setActiveProfiles();
+        miljø.setDefaultProfiles("local");
+        assertThrows(IllegalStateException.class, () -> LokalKonfigurasjon.validerLokaltMiljø(miljø));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"spring.profiles.include", "spring.profiles.include[0]"})
-    void avviserInkludertLokalprofil(final String navn) {
-        final MockEnvironment miljo = lokaltMiljo().withProperty(navn, "local");
-        assertThrows(IllegalStateException.class, () -> LokalKonfigurasjon.validerLokaltMiljo(miljo));
+    void avviser_inkludert_lokalprofil(final String navn) {
+        final MockEnvironment miljø = lokaltMiljø().withProperty(navn, "local");
+        assertThrows(IllegalStateException.class, () -> LokalKonfigurasjon.validerLokaltMiljø(miljø));
     }
 
     @Test
-    void stopperOppstartFoerDatabaseOgSikkerhetskjedeOpprettes() {
+    void stopper_oppstart_før_database_og_sikkerhetskjede_opprettes() {
         new ApplicationContextRunner()
                 .withUserConfiguration(LokalKonfigurasjon.class)
                 .withInitializer(kontekst -> kontekst.getEnvironment().setActiveProfiles("local", "prod"))
@@ -62,9 +62,9 @@ class LokalKonfigurasjonTest {
     @ParameterizedTest
     @ValueSource(strings = {"NAIS_CLUSTER_NAME", "NAIS_APP_NAME", "KUBERNETES_SERVICE_HOST",
             "READWRITE_PGJDBCURL", "PGJDBCURL", "NAIS_DATABASE_APP_URL"})
-    void avviserDriftsmiljoOgArvedeDatabaser(final String navn) {
-        final MockEnvironment miljo = lokaltMiljo().withProperty(navn, "ikke-lokalt");
-        assertThrows(IllegalStateException.class, () -> LokalKonfigurasjon.validerLokaltMiljo(miljo));
+    void avviser_driftsmiljø_og_arvede_databaser(final String navn) {
+        final MockEnvironment miljø = lokaltMiljø().withProperty(navn, "ikke-lokalt");
+        assertThrows(IllegalStateException.class, () -> LokalKonfigurasjon.validerLokaltMiljø(miljø));
     }
 
     @ParameterizedTest
@@ -79,11 +79,11 @@ class LokalKonfigurasjonTest {
             "jdbc:postgresql://[invalid/statistikk",
             "jdbc:h2:mem:test"
     })
-    void avviserEksterneOgTvetydigeDatabaseadresser(final String url) {
+    void avviser_eksterne_og_tvetydige_databaseadresser(final String url) {
         for (final String navn : new String[]{"spring.datasource.url", "spring.liquibase.url",
                 "spring.datasource.hikari.jdbc-url"}) {
-            final MockEnvironment miljo = lokaltMiljo().withProperty(navn, url);
-            assertThrows(IllegalStateException.class, () -> LokalKonfigurasjon.validerLokaltMiljo(miljo));
+            final MockEnvironment miljø = lokaltMiljø().withProperty(navn, url);
+            assertThrows(IllegalStateException.class, () -> LokalKonfigurasjon.validerLokaltMiljø(miljø));
         }
     }
 }

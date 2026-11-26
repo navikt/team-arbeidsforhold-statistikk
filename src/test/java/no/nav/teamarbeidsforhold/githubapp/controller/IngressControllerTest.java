@@ -32,7 +32,7 @@ class IngressControllerTest {
     private JwtDecoder jwtDecoder;
 
     @Test
-    void kreverInnlogging() throws Exception {
+    void krever_innlogging() throws Exception {
         for (final String sti : List.of("/", "/index.html", "/api/ingress", "/api/repo",
                 "/api/me", "/api/vulnerability/critical")) {
             mvc.perform(get(sti)).andExpect(status().isUnauthorized());
@@ -42,7 +42,7 @@ class IngressControllerTest {
     }
 
     @Test
-    void avviserAnonymeAdminKallUtenCsrf() throws Exception {
+    void avviser_anonyme_admin_kall_uten_csrf() throws Exception {
         for (final String handling : List.of("naisjobb", "nvdjobb", "liquibase/unlock")) {
             mvc.perform(post("/api/admin/" + handling)).andExpect(status().isForbidden());
         }
@@ -50,7 +50,7 @@ class IngressControllerTest {
     }
 
     @Test
-    void returnererGenerertKontraktForInnloggetBruker() throws Exception {
+    void returnerer_generert_kontrakt_for_innlogget_bruker() throws Exception {
         when(jwtDecoder.decode("test-token")).thenReturn(Jwt.withTokenValue("test-token")
                 .header("alg", "RS256").subject("test-user").build());
         final var ingress = new Ingress("https://app.nav.no/path", "app", "prod-gcp", "")
